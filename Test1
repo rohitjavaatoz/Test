@@ -70,3 +70,70 @@ public class MailMessageApiRestControllerTest {
     // Add more test cases to cover other scenarios as needed
 
 }
+-----------
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import java.util.UUID;
+
+@RunWith(MockitoJUnitRunner.class)
+public class MailMessageApiRestControllerTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @InjectMocks
+    private MailMessageApiRestController controller;
+
+    private MockMvc mockMvc;
+    private EmailLockHistoryRequest mockRequest;
+    private UUID uuid = UUID.randomUUID();
+
+    @Before
+    public void setup() {
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockRequest = new EmailLockHistoryRequest();
+        // Set up mockRequest fields if needed
+    }
+
+    @Test
+    public void saveAndUpdateLockHistory_ValidAction_Success() throws Exception {
+        String validAction = "lock";
+        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(mockRequest, validAction, uuid))
+            .thenReturn(new EmailLockResponse());
+
+        mockMvc.perform(patch("/email-messages/{emailMessageId}/lock", uuid)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{}")
+            .param("action", validAction))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void saveAndUpdateLockHistory_InvalidAction_BadRequest() throws Exception {
+        String invalidAction = "invalidAction";
+        doThrow(new Exception("Invalid action " + invalidAction + " supplied"))
+            .when(emailMessageExtractionService)
+            .saveAndUpdateMailLockHistory(mockRequest, invalidAction, uuid);
+
+        mockMvc.perform(patch("/email-messages/{emailMessageId}/lock", uuid)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{}")
+            .param("action", invalidAction))
+            .andExpect(status().isBadRequest());
+    }
+
+    // Additional tests for covering other lines and scenarios using MockMvc
+
+}
