@@ -1,0 +1,16 @@
+    @RequestMapping(value = "/email-messages/{emailMessageId}/lock", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.PATCH)
+public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHistoryRequest body, String action, UUID uuid) throws Exception {
+		LOGGER.info("MailMessageApiRestController::saveAndUpdateLockHistory: Getting the action as (true or false) saving the lock history table updating the emailmessages table : action", action, uuid);
+		EmailLockResponse emailLockedHistory = new EmailLockResponse();
+		try {
+			if (action != null && lockActions.contains(action.toLowerCase())) {
+				emailLockedHistory = emailMessageExtractionService.saveAndUpdateMailLockHistory(body, action, uuid);
+			} else {
+				throw new Exception("Invalid action " + action + "supplied");
+			}
+		} catch (Exception exe) {
+			LOGGER.error("MailMessageApiRestController::saveAndUpdateLockHistory: exception in saveAndUpdateLockHistory method where action {} Exception {} uuid {}", action, exe, uuid);
+			throw exe;
+		}
+		return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
+	}
