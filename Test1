@@ -14,3 +14,59 @@ public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHisto
 		}
 		return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
 	}
+----------------------
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.UUID;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+@RunWith(MockitoJUnitRunner.class)
+public class MailMessageApiRestControllerTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @InjectMocks
+    private MailMessageApiRestController controller;
+
+    private EmailLockHistoryRequest mockRequest;
+    private String validAction = "lock";
+    private String invalidAction = "invalidAction";
+    private UUID uuid = UUID.randomUUID();
+
+    @Before
+    public void setup() {
+        mockRequest = new EmailLockHistoryRequest();
+    }
+
+    @Test
+    public void saveAndUpdateLockHistory_ValidAction_Success() throws Exception {
+        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(mockRequest, validAction, uuid))
+            .thenReturn(new EmailLockResponse());
+
+        ResponseEntity<EmailLockResponse> response = controller.saveAndUpdateLockHistory(mockRequest, validAction, uuid);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test(expected = Exception.class)
+    public void saveAndUpdateLockHistory_InvalidAction_ExceptionThrown() throws Exception {
+        doThrow(new Exception("Invalid action " + invalidAction + "supplied"))
+            .when(emailMessageExtractionService)
+            .saveAndUpdateMailLockHistory(mockRequest, invalidAction, uuid);
+
+        controller.saveAndUpdateLockHistory(mockRequest, invalidAction, uuid);
+    }
+
+    // Add more test cases to cover other scenarios as needed
+
+}
