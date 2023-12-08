@@ -81,3 +81,4 @@ class MailMessageApiRestControllerTest {
         verifyNoInteractions(emailMessageExtractionService);
     }
 }
+.MissingPathVariableException: Required URI template variable 'action' for method parameter type String is not present
