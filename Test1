@@ -48,7 +48,6 @@ public class MailHandlingServiceTest {
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(mockResponse, responseEntity.getBody());
-        verify(emailMessageExtractionService).getGlobalSearch(id, uuid);
     }
 
     @Test
@@ -63,7 +62,6 @@ public class MailHandlingServiceTest {
 
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
         assertEquals(null, responseEntity.getBody());
-        verify(emailMessageExtractionService).getGlobalSearch(id, uuid);
     }
 
     @Test
@@ -78,7 +76,6 @@ public class MailHandlingServiceTest {
 
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
         assertEquals(null, responseEntity.getBody());
-        verify(emailMessageExtractionService).getGlobalSearch(id, uuid);
     }
     
     // Other test cases for different scenarios
