@@ -1,3 +1,5 @@
+	private static final List<String> lockActions = Arrays.asList(Constants.LOCKED,Constants.UN_LOCKED);
+
     @RequestMapping(value = "/email-messages/{emailMessageId}/lock", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.PATCH)
 public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHistoryRequest body, String action, UUID uuid) throws Exception {
 		LOGGER.info("MailMessageApiRestController::saveAndUpdateLockHistory: Getting the action as (true or false) saving the lock history table updating the emailmessages table : action", action, uuid);
