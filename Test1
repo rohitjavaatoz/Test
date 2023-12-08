@@ -1,1 +1,32 @@
-java.lang.AssertionError: expected java.lang.Exception to be thrown, but nothing was thrown
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private MailHandlingService mailHandlingService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    public void testReplyEmail_WhenActionIsNotDefined_Exception() {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        emailNotificationsDTO.setAction("undefined_action");
+
+        UUID uuid = UUID.randomUUID();
+
+        assertThrows(Exception.class, () -> {
+            mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+        });
+    }
+
+    // Other test cases for different scenarios
+}
