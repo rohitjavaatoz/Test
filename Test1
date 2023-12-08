@@ -15,68 +15,30 @@ public ResponseEntity<GlobalSearchResponse> globalSearch(String id, UUID uuid) {
         }
     }
 -----------
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+public class GlobalSearchResponse {
 
-import java.util.UUID;
+	private List<GlobalSearchInfoIfc> referenceInfos;
+	private List<GlobalSearchInfoIfc> requestInfos;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+	public List<GlobalSearchInfoIfc> getReferenceInfos() {
+		return referenceInfos;
+	}
 
-public class MailHandlingServiceTest {
+	public void setReferenceInfos(List<GlobalSearchInfoIfc> referenceInfos) {
+		this.referenceInfos = referenceInfos;
+	}
 
-    @Mock
-    private EmailMessageExtractionService emailMessageExtractionService;
+	public List<GlobalSearchInfoIfc> getRequestInfos() {
+		return requestInfos;
+	}
 
-    @InjectMocks
-    private MailMessageApiController mailMessageApiController;
+	public void setRequestInfos(List<GlobalSearchInfoIfc> requestInfos) {
+		this.requestInfos = requestInfos;
+	}
 
-    @Test
-    public void testGlobalSearch_WhenResponseExists_ReturnsOK() throws Exception {
-        String id = "exampleId";
-        UUID uuid = UUID.randomUUID();
+	@Override
+	public String toString() {
+		return "GlobalSearchResponse [referenceInfos=" + referenceInfos + ", requestInfos=" + requestInfos + "]";
+	}
 
-        GlobalSearchResponse mockResponse = new GlobalSearchResponse();
-        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
-                .thenReturn(mockResponse);
-
-        ResponseEntity<GlobalSearchResponse> responseEntity = mailMessageApiController.globalSearch(id, uuid);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(mockResponse, responseEntity.getBody());
-    }
-
-    @Test
-    public void testGlobalSearch_WhenResponseIsNull_ReturnsNoContent() throws Exception {
-        String id = "exampleId";
-        UUID uuid = UUID.randomUUID();
-
-        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
-                .thenReturn(null);
-
-        ResponseEntity<GlobalSearchResponse> responseEntity = mailMessageApiController.globalSearch(id, uuid);
-
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-        assertEquals(null, responseEntity.getBody());
-    }
-
-    @Test
-    public void testGlobalSearch_WhenExceptionOccurs_ReturnsNoContent() throws Exception {
-        String id = "exampleId";
-        UUID uuid = UUID.randomUUID();
-
-        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
-                .thenThrow(new Exception("Some exception occurred"));
-
-        ResponseEntity<GlobalSearchResponse> responseEntity = mailMessageApiController.globalSearch(id, uuid);
-
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-        assertEquals(null, responseEntity.getBody());
-    }
-    
-    // Other test cases for different scenarios
 }
