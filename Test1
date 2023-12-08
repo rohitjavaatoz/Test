@@ -29,3 +29,79 @@
             return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
         }
     }
+==========
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+class MailHandlingServiceTest {
+
+    @Mock
+    private MailHandlingService mailHandlingService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    void testReplyEmail_WhenActionIsReply_Success() throws Exception {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO("reply", /* other params */);
+        UUID uuid = UUID.randomUUID();
+
+        ModelApiResponse mockResponse = new ModelApiResponse();
+        when(mailHandlingService.sendReplyEmail(any(EmailNotificationsDTO.class), any(UUID.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        verify(mailHandlingService).sendReplyEmail(emailNotificationsDTO, uuid);
+    }
+
+    @Test
+    void testReplyEmail_WhenActionIsForward_Success() throws Exception {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO("forward", /* other params */);
+        UUID uuid = UUID.randomUUID();
+
+        ModelApiResponse mockResponse = new ModelApiResponse();
+        when(mailHandlingService.sendForwardEmail(any(EmailNotificationsDTO.class), any(UUID.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        verify(mailHandlingService).sendForwardEmail(emailNotificationsDTO, uuid);
+    }
+
+    @Test
+    void testReplyEmail_WhenActionIsNotDefined() throws Exception {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO("unknown", /* other params */);
+        UUID uuid = UUID.randomUUID();
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        verifyNoInteractions(mailHandlingService);
+    }
+
+    @Test
+    void testReplyEmail_WhenExceptionOccurs() throws Exception {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO("reply", /* other params */);
+        UUID uuid = UUID.randomUUID();
+
+        when(mailHandlingService.sendReplyEmail(any(EmailNotificationsDTO.class), any(UUID.class)))
+                .thenThrow(new Exception("Error sending email"));
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        verify(mailHandlingService).sendReplyEmail(emailNotificationsDTO, uuid);
+    }
+}
