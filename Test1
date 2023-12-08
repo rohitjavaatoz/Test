@@ -15,3 +15,55 @@
         }
         return response;
     }
+------------
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+class MailHandlingServiceTest {
+
+    @Mock
+    private MailHandlingService mailHandlingService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    void testUpdateEmailMessageSeenStatus_Success() throws Exception {
+        int emailMessageId = 123;
+        boolean status = true;
+        UUID uuid = UUID.randomUUID();
+
+        ResponseEntity<ModelApiResponse> mockResponse = new ResponseEntity<>(new ModelApiResponse(), HttpStatus.OK);
+        when(mailHandlingService.updateEmailMessageStatus(anyInt(), anyBoolean(), any(UUID.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.updateEmailMessageSeenStatus(emailMessageId, status, uuid);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        verify(mailHandlingService).updateEmailMessageStatus(emailMessageId, status, uuid);
+    }
+
+    @Test
+    void testUpdateEmailMessageSeenStatus_Exception() throws Exception {
+        int emailMessageId = 123;
+        boolean status = true;
+        UUID uuid = UUID.randomUUID();
+
+        when(mailHandlingService.updateEmailMessageStatus(anyInt(), anyBoolean(), any(UUID.class)))
+                .thenThrow(new Exception("Record not found"));
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.updateEmailMessageSeenStatus(emailMessageId, status, uuid);
+
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        verify(mailHandlingService).updateEmailMessageStatus(emailMessageId, status, uuid);
+    }
+}
