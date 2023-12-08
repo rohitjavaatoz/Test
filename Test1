@@ -17,78 +17,10 @@ public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHisto
 		return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
 	}
 ----------------------
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-@RunWith(MockitoJUnitRunner.class)
-public class MailMessageApiRestControllerTest {
-
-    @Mock
-    private EmailMessageExtractionService emailMessageExtractionService;
-
-    @InjectMocks
-    private MailMessageApiRestController controller;
-
-    private EmailLockHistoryRequest mockRequest;
-    private String validAction = "lock";
-    private String invalidAction = "invalidAction";
-    private UUID uuid = UUID.randomUUID();
-
-    @Before
-    public void setup() {
-        mockRequest = new EmailLockHistoryRequest();
-    }
-
-    @Test
-    public void saveAndUpdateLockHistory_ValidAction_Success() throws Exception {
-        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(mockRequest, validAction, uuid))
-            .thenReturn(new EmailLockResponse());
-
-        ResponseEntity<EmailLockResponse> response = controller.saveAndUpdateLockHistory(mockRequest, validAction, uuid);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test(expected = Exception.class)
-    public void saveAndUpdateLockHistory_InvalidAction_ExceptionThrown() throws Exception {
-        doThrow(new Exception("Invalid action " + invalidAction + "supplied"))
-            .when(emailMessageExtractionService)
-            .saveAndUpdateMailLockHistory(mockRequest, invalidAction, uuid);
-
-        controller.saveAndUpdateLockHistory(mockRequest, invalidAction, uuid);
-    }
-
-    // Add more test cases to cover other scenarios as needed
-
-}
------------
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
-import java.util.UUID;
-
 @RunWith(MockitoJUnitRunner.class)
 public class MailMessageApiRestControllerTest {
 
@@ -96,46 +28,49 @@ public class MailMessageApiRestControllerTest {
     private EmailMessageExtractionService emailMessageExtractionService;
 
     @InjectMocks
-    private MailMessageApiRestController controller;
+    private MailMessageApiRestController mailMessageApiRestController;
 
     private MockMvc mockMvc;
-    private EmailLockHistoryRequest mockRequest;
-    private UUID uuid = UUID.randomUUID();
 
     @Before
-    public void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        mockRequest = new EmailLockHistoryRequest();
-        // Set up mockRequest fields if needed
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(mailMessageApiRestController).build();
     }
 
     @Test
-    public void saveAndUpdateLockHistory_ValidAction_Success() throws Exception {
-        String validAction = "lock";
-        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(mockRequest, validAction, uuid))
-            .thenReturn(new EmailLockResponse());
+    public void testSaveAndUpdateLockHistory_WhenActionIsLocked() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
+        String action = Constants.LOCKED;
+
+        EmailLockResponse mockResponse = new EmailLockResponse();
+        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(any(), anyString(), any(UUID.class)))
+                .thenReturn(mockResponse);
 
         mockMvc.perform(patch("/email-messages/{emailMessageId}/lock", uuid)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{}")
-            .param("action", validAction))
-            .andExpect(status().isOk());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .param("action", action))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.someField").value("expectedValue"));
+
+        verify(emailMessageExtractionService).saveAndUpdateMailLockHistory(request, action, uuid);
     }
 
     @Test
-    public void saveAndUpdateLockHistory_InvalidAction_BadRequest() throws Exception {
+    public void testSaveAndUpdateLockHistory_WhenInvalidAction() throws Exception {
+        UUID uuid = UUID.randomUUID();
         String invalidAction = "invalidAction";
-        doThrow(new Exception("Invalid action " + invalidAction + " supplied"))
-            .when(emailMessageExtractionService)
-            .saveAndUpdateMailLockHistory(mockRequest, invalidAction, uuid);
 
         mockMvc.perform(patch("/email-messages/{emailMessageId}/lock", uuid)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{}")
-            .param("action", invalidAction))
-            .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .param("action", invalidAction))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Invalid action")));
+
+        verifyNoInteractions(emailMessageExtractionService);
     }
 
-    // Additional tests for covering other lines and scenarios using MockMvc
-
+    // Other test cases to cover different scenarios can be added here
 }
