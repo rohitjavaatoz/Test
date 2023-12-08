@@ -192,4 +192,63 @@ class MailHandlingServiceTest {
     // Test for forward action success case
     // ... Add similar tests for 'unknown action' and exception cases as previously shown
 }
+-----------------
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private MailHandlingService mailHandlingService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    public void testReplyEmail_WhenActionIsNotDefined_Exception() {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        emailNotificationsDTO.setAction("undefined_action");
+
+        UUID uuid = UUID.randomUUID();
+
+        assertThrows(Exception.class, () -> {
+            mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+        });
+
+        verifyNoInteractions(mailHandlingService);
+    }
+
+    @Test
+    public void testReplyEmail_WhenNon200Code_ReturnsBadRequest() throws Exception {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        emailNotificationsDTO.setAction("some_action");
+
+        UUID uuid = UUID.randomUUID();
+
+        ModelApiResponse mockResponse = new ModelApiResponse();
+        mockResponse.setCode(400);
+        mockResponse.setMessage("Invalid action");
+
+        when(mailHandlingService.sendForwardEmail(any(EmailNotificationsDTO.class), any(UUID.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("Invalid action", responseEntity.getBody().getMessage());
+        verify(mailHandlingService).sendForwardEmail(emailNotificationsDTO, uuid);
+    }
+    
+    // Other test cases for different scenarios
+}
 
