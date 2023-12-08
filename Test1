@@ -1,32 +1,16 @@
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.ResponseEntity;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
-public class MailHandlingServiceTest {
-
-    @Mock
-    private MailHandlingService mailHandlingService;
-
-    @InjectMocks
-    private MailMessageApiController mailMessageApiController;
-
-    @Test
-    public void testReplyEmail_WhenActionIsNotDefined_Exception() {
-        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-        emailNotificationsDTO.setAction("undefined_action");
-
-        UUID uuid = UUID.randomUUID();
-
-        assertThrows(Exception.class, () -> {
-            mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
-        });
+    @RequestMapping(value = "/email-messages/global-search/{globalId}", produces = {"application/json"}, method = RequestMethod.GET)
+public ResponseEntity<GlobalSearchResponse> globalSearch(String id, UUID uuid) {
+        LOGGER.info("globalSearch: Getting the request id or reference id : referenceIdOrrequestId", id, uuid);
+        GlobalSearchResponse globalSearchResponse = null;
+        try {
+            globalSearchResponse = emailMessageExtractionService.getGlobalSearch(id, uuid);
+        } catch (Exception exe) {
+            LOGGER.error("exception in emailMessageExtraction method where referenceIdOrrequestId =", id, "Exception =", exe, uuid);
+            return new ResponseEntity<>(globalSearchResponse, HttpStatus.NO_CONTENT);
+        }
+        if (Optional.ofNullable(globalSearchResponse).isPresent()) {
+            return new ResponseEntity<>(globalSearchResponse, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(globalSearchResponse, HttpStatus.NO_CONTENT);
+        }
     }
-
-    // Other test cases for different scenarios
-}
