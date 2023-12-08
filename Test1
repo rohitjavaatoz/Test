@@ -148,4 +148,48 @@ class MailHandlingServiceTest {
 
     // Similar tests for 'forward', 'unknown action', and exception cases
 }
+------------
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+class MailHandlingServiceTest {
+
+    @Mock
+    private MailHandlingService mailHandlingService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    void testReplyEmail_WhenActionIsForward_Success() throws Exception {
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        emailNotificationsDTO.setAction("forward");
+        // Set other required parameters
+        emailNotificationsDTO.setSubject("Forward Subject");
+        // ... other parameters
+
+        UUID uuid = UUID.randomUUID();
+
+        ModelApiResponse mockResponse = new ModelApiResponse();
+        when(mailHandlingService.sendForwardEmail(any(EmailNotificationsDTO.class), any(UUID.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        verify(mailHandlingService).sendForwardEmail(emailNotificationsDTO, uuid);
+    }
+    
+    // Test for forward action success case
+    // ... Add similar tests for 'unknown action' and exception cases as previously shown
+}
 
