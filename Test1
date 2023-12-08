@@ -1,151 +1,17 @@
-	private static final List<String> lockActions = Arrays.asList(Constants.LOCKED,Constants.UN_LOCKED);
-
-    @RequestMapping(value = "/email-messages/{emailMessageId}/lock", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.PATCH)
-public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHistoryRequest body, String action, UUID uuid) throws Exception {
-		LOGGER.info("MailMessageApiRestController::saveAndUpdateLockHistory: Getting the action as (true or false) saving the lock history table updating the emailmessages table : action", action, uuid);
-		EmailLockResponse emailLockedHistory = new EmailLockResponse();
-		try {
-			if (action != null && lockActions.contains(action.toLowerCase())) {
-				emailLockedHistory = emailMessageExtractionService.saveAndUpdateMailLockHistory(body, action, uuid);
-			} else {
-				throw new Exception("Invalid action " + action + "supplied");
-			}
-		} catch (Exception exe) {
-			LOGGER.error("MailMessageApiRestController::saveAndUpdateLockHistory: exception in saveAndUpdateLockHistory method where action {} Exception {} uuid {}", action, exe, uuid);
-			throw exe;
-		}
-		return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
-	}
-----------------------
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(MailMessageApiRestController.class)
-class MailMessageApiRestControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Mock
-    private EmailMessageExtractionService emailMessageExtractionService;
-
-    @InjectMocks
-    private MailMessageApiRestController mailMessageApiRestController;
-
-    @Test
-    void testSaveAndUpdateLockHistory_WhenActionIsLocked() throws Exception {
-        UUID uuid = UUID.randomUUID();
-        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
-        String action = Constants.LOCKED;
-
-        EmailLockResponse mockResponse = new EmailLockResponse();
-        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(any(), anyString(), any(UUID.class)))
-                .thenReturn(mockResponse);
-
-        mockMvc.perform(patch("/email-messages/{emailMessageId}/lock", uuid)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}")
-                .param("action", action))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").exists())
-                .andExpect(jsonPath("$.someField").value("expectedValue"));
-
-        verify(emailMessageExtractionService).saveAndUpdateMailLockHistory(request, action, uuid);
+    @RequestMapping(value = "/email/updateEmailMessageSeenStatus/{emailMessageId}/{status}", produces = {"application/json"}, method = RequestMethod.PUT)
+    public ResponseEntity<ModelApiResponse> updateEmailMessageSeenStatus(@ApiParam(value = "Email that needs to be retrieved with given emailMessageId", required = true) @PathVariable("emailMessageId") Integer emailMessageId, @PathVariable("status") Boolean status,@RequestHeader("UUID") UUID uuid){
+        ResponseEntity<ModelApiResponse> response;
+        LOGGER.info("updateEmailMessageSeenStatus: Updating  email messages status of email message ID {}  with {} : uuid={}",emailMessageId,status,uuid);
+        try{
+            response=mailHandlingService.updateEmailMessageStatus(emailMessageId,status,uuid);
+            LOGGER.info("updateEmailMessageSeenStatus: email messages status of email message ID {} updated with {} : uuid={}",emailMessageId,status,uuid);
+        }
+        catch (Exception e){
+            ModelApiResponse modelApiResponse=new ModelApiResponse();
+            modelApiResponse.message("record with id '"+ emailMessageId +"' wasn't found");
+            modelApiResponse.code(400);
+            LOGGER.error("updateEmailMessageSeenStatus: Error while updating Email Message seen status :{} , uuid={}",e,uuid);
+            return new ResponseEntity<>(modelApiResponse, HttpStatus.NOT_FOUND);
+        }
+        return response;
     }
-
-    @Test
-    void testSaveAndUpdateLockHistory_WhenInvalidAction() throws Exception {
-        UUID uuid = UUID.randomUUID();
-        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
-        String invalidAction = "invalidAction";
-
-        mockMvc.perform(patch("/email-messages/{emailMessageId}/lock", uuid)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}")
-                .param("action", invalidAction))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Invalid action")));
-
-        verifyNoInteractions(emailMessageExtractionService);
-    }
-}
-.MissingPathVariableException: Required URI template variable 'action' for method parameter type String is not present
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-class MailMessageApiRestControllerTest {
-
-    private MockMvc mockMvc;
-
-    @Mock
-    private EmailMessageExtractionService emailMessageExtractionService;
-
-    @InjectMocks
-    private MailMessageApiRestController mailMessageApiRestController;
-
-    private static final List<String> lockActions = Arrays.asList(Constants.LOCKED, Constants.UN_LOCKED);
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(mailMessageApiRestController).build();
-    }
-
-    @Test
-    void testSaveAndUpdateLockHistory_WhenActionIsLocked() throws Exception {
-        UUID uuid = UUID.randomUUID();
-        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
-        String action = Constants.LOCKED;
-
-        EmailLockResponse mockResponse = new EmailLockResponse();
-        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(any(), anyString(), any(UUID.class)))
-                .thenReturn(mockResponse);
-
-        ResponseEntity<EmailLockResponse> responseEntity = mailMessageApiRestController.saveAndUpdateLockHistory(request, action, uuid);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(mockResponse, responseEntity.getBody());
-        verify(emailMessageExtractionService).saveAndUpdateMailLockHistory(request, action, uuid);
-    }
-
-    @Test
-    void testSaveAndUpdateLockHistory_WhenInvalidAction() {
-        UUID uuid = UUID.randomUUID();
-        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
-        String invalidAction = "invalidAction";
-
-        assertThrows(Exception.class, () -> {
-            mailMessageApiRestController.saveAndUpdateLockHistory(request, invalidAction, uuid);
-        });
-
-        verifyNoInteractions(emailMessageExtractionService);
-    }
-}
