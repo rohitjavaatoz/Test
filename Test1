@@ -82,3 +82,70 @@ class MailMessageApiRestControllerTest {
     }
 }
 .MissingPathVariableException: Required URI template variable 'action' for method parameter type String is not present
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+class MailMessageApiRestControllerTest {
+
+    private MockMvc mockMvc;
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @InjectMocks
+    private MailMessageApiRestController mailMessageApiRestController;
+
+    private static final List<String> lockActions = Arrays.asList(Constants.LOCKED, Constants.UN_LOCKED);
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(mailMessageApiRestController).build();
+    }
+
+    @Test
+    void testSaveAndUpdateLockHistory_WhenActionIsLocked() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
+        String action = Constants.LOCKED;
+
+        EmailLockResponse mockResponse = new EmailLockResponse();
+        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(any(), anyString(), any(UUID.class)))
+                .thenReturn(mockResponse);
+
+        ResponseEntity<EmailLockResponse> responseEntity = mailMessageApiRestController.saveAndUpdateLockHistory(request, action, uuid);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(mockResponse, responseEntity.getBody());
+        verify(emailMessageExtractionService).saveAndUpdateMailLockHistory(request, action, uuid);
+    }
+
+    @Test
+    void testSaveAndUpdateLockHistory_WhenInvalidAction() {
+        UUID uuid = UUID.randomUUID();
+        EmailLockHistoryRequest request = new EmailLockHistoryRequest();
+        String invalidAction = "invalidAction";
+
+        assertThrows(Exception.class, () -> {
+            mailMessageApiRestController.saveAndUpdateLockHistory(request, invalidAction, uuid);
+        });
+
+        verifyNoInteractions(emailMessageExtractionService);
+    }
+}
