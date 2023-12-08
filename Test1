@@ -20,26 +20,27 @@ public class GlobalSearchResponse {
 	private List<GlobalSearchInfoIfc> referenceInfos;
 	private List<GlobalSearchInfoIfc> requestInfos;
 
-	public List<GlobalSearchInfoIfc> getReferenceInfos() {
-		return referenceInfos;
-	}
+}
+public interface GlobalSearchInfoIfc {
 
-	public void setReferenceInfos(List<GlobalSearchInfoIfc> referenceInfos) {
-		this.referenceInfos = referenceInfos;
-	}
+	String getId();
 
-	public List<GlobalSearchInfoIfc> getRequestInfos() {
-		return requestInfos;
-	}
+	String getPartyName();
 
-	public void setRequestInfos(List<GlobalSearchInfoIfc> requestInfos) {
-		this.requestInfos = requestInfos;
-	}
+	String getCreatedDate();
 
-	@Override
-	public String toString() {
-		return "GlobalSearchResponse [referenceInfos=" + referenceInfos + ", requestInfos=" + requestInfos + "]";
-	}
+	Integer getEmailMessageId();
+
+}
+public interface GlobalSearchInfoIfc {
+
+	String getId();
+
+	String getPartyName();
+
+	String getCreatedDate();
+
+	Integer getEmailMessageId();
 
 }
 -------------
