@@ -1,62 +1,16 @@
-@Override
-    public ResponseEntity<ModelApiResponse> replyEmail(EmailNotificationsDTO emailNotificationsDTO, @RequestHeader("UUID") UUID uuid){
-        ModelApiResponse modelApiResponse = new ModelApiResponse();
-        String response;
-        try{
-            if(emailNotificationsDTO.getAction().equalsIgnoreCase("reply")) {
-                LOGGER.info("replyEmail:Reply email :{} , uuid={}",emailNotificationsDTO,uuid);
-                modelApiResponse = mailHandlingService.sendReplyEmail(emailNotificationsDTO, uuid);
-            }
-            else if(emailNotificationsDTO.getAction().equalsIgnoreCase("forward")){
-                LOGGER.info("replyEmail:Forward email :{} , uuid={}",emailNotificationsDTO,uuid);
-                modelApiResponse = mailHandlingService.sendForwardEmail(emailNotificationsDTO,uuid);
-            }
-            else{
-                throw new Exception("Email Action is not Defined");
-            }
-        }
-        catch (Exception e){
-            LOGGER.error("getMailMessagesByEmailExtractionId: Error while sending Email: {}, uuid={}",e,uuid);
-            modelApiResponse.code(400);
-            modelApiResponse.message(e.toString());
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
-        }
-        LOGGER.info("getMailMessagesByEmailExtractionId:  {}, uuid={}",modelApiResponse.getMessage(),uuid);
-        if(modelApiResponse.getCode() == 200) {
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.CREATED);
-        }
-        else{
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
-        }
+         @RequestMapping(value = "/email-messages/{emailMessageId}/attachments/{attachmentId}/download",  method = RequestMethod.POST)
+    public ResponseEntity<Object> getEmailAttachmentDownloaddedById(@PathVariable("id") Integer id, Map<String,String> map,@RequestHeader("UUID") UUID uuid) {
+
+        List<EmailAttachments> emailAttachmentsforEmailMessageId = new ArrayList<>();  
+    	emailAttachmentsforEmailMessageId=emailAttachmentsRepository.getEmailAttachmentsByEmailMessageId(id);
+        logger.info("getEmailAttachmentDownloadedById:Downloading the email Attachment by email id {} : UUID ={}",id,uuid);
+         List<EmailAttachments> result = emailAttachmentsforEmailMessageId.stream()              
+                      .filter(attachment -> attachment.getFileName().equals(map.get("fileName")))
+                      .collect(Collectors.toList());
+        byte[]  file= result.get(0).getAttachmentFile();
+         logger.info("Inside Download Attachment Method : UUID={}",uuid);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.get(0).getFileName() + "\"")
+                .body(file);
     }
------------
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
-public class MailHandlingServiceTest {
-
-    @Mock
-    private MailHandlingService mailHandlingService;
-
-    @InjectMocks
-    private MailMessageApiController mailMessageApiController;
-
-    @Test
-    public void testReplyEmail_WhenEmailActionIsNotDefined_ReturnsBadRequest() throws Exception {
-        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-        emailNotificationsDTO.setAction("undefined");
-
-        UUID uuid = UUID.randomUUID();
-
-        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-    }
-}
-
