@@ -1,74 +1,15 @@
-         @RequestMapping(value = "/email-messages/{emailMessageId}/attachments/{attachmentId}/download",  method = RequestMethod.POST)
-    public ResponseEntity<Object> getEmailAttachmentDownloaddedById(@PathVariable("id") Integer id, Map<String,String> map,@RequestHeader("UUID") UUID uuid) {
-
-        List<EmailAttachments> emailAttachmentsforEmailMessageId = new ArrayList<>();  
-    	emailAttachmentsforEmailMessageId=emailAttachmentsRepository.getEmailAttachmentsByEmailMessageId(id);
-        logger.info("getEmailAttachmentDownloadedById:Downloading the email Attachment by email id {} : UUID ={}",id,uuid);
-         List<EmailAttachments> result = emailAttachmentsforEmailMessageId.stream()              
-                      .filter(attachment -> attachment.getFileName().equals(map.get("fileName")))
-                      .collect(Collectors.toList());
-        byte[]  file= result.get(0).getAttachmentFile();
-         logger.info("Inside Download Attachment Method : UUID={}",uuid);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.get(0).getFileName() + "\"")
-                .body(file);
+    @RequestMapping(value = "/email-messages/{emailMessageId}/attachments/{attachmentId}", produces = { "application/json" }, consumes = { "application/json" }, method = RequestMethod.PATCH)
+public ResponseEntity<ModelApiResponse> updateEmailAttachment(Integer id, EmailAttachments emailAttachments) {
+        ModelApiResponse modelApiResponse = new ModelApiResponse();
+        EmailAttachments emailAttachmentsToUpdate = new EmailAttachments();
+       // if( emailAttachmentsToUpdate != null){
+            emailAttachmentsToUpdate.setEmailMessageId(emailAttachments.getEmailMessageId());
+            emailAttachmentsToUpdate.setFileName(emailAttachments.getFileName());
+            emailAttachmentsToUpdate.setFileType(emailAttachments.getFileType());
+            emailAttachmentsToUpdate.setFileSize(emailAttachments.getFileSize());
+            emailAttachmentsToUpdate.setContentDisposition(emailAttachments.getContentDisposition());
+            emailAttachmentsRepository.save(emailAttachmentsToUpdate);
+            modelApiResponse.message("Updated successfully");
+            modelApiResponse.code(201);
+            return new ResponseEntity<>(modelApiResponse, HttpStatus.OK);
     }
-==========
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-public class EmailAttachmentsControllerTest {
-
-    @Mock
-    private EmailAttachmentsRepository emailAttachmentsRepository;
-
-    @InjectMocks
-    private EmailAttachmentsController emailAttachmentsController;
-
-    @Test
-    public void testGetEmailAttachmentDownloadedById_Success() {
-        // Mock data
-        Integer emailMessageId = 1;
-        String fileName = "example.pdf";
-        UUID uuid = UUID.randomUUID();
-        byte[] fileContent = "sample file content".getBytes();
-
-        // Mock the repository behavior
-        List<EmailAttachments> emailAttachments = new ArrayList<>();
-        EmailAttachments attachment = new EmailAttachments();
-        attachment.setFileName(fileName);
-        attachment.setAttachmentFile(fileContent);
-        emailAttachments.add(attachment);
-
-        when(emailAttachmentsRepository.getEmailAttachmentsByEmailMessageId(emailMessageId))
-                .thenReturn(emailAttachments);
-
-        // Create a map for the request
-        Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("fileName", fileName);
-
-        // Call the controller method
-        ResponseEntity<Object> responseEntity = emailAttachmentsController.getEmailAttachmentDownloadedById(emailMessageId, requestMap, uuid);
-
-        // Assert the response
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(MediaType.APPLICATION_OCTET_STREAM, responseEntity.getHeaders().getContentType());
-        assertEquals("attachment; filename=\"" + fileName + "\"", responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION));
-        assertEquals(fileContent, responseEntity.getBody());
-
-        // Verify method invocations
-        verify(emailAttachmentsRepository, times(1)).getEmailAttachmentsByEmailMessageId(emailMessageId);
-    }
-}
