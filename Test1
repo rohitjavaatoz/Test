@@ -29,3 +29,38 @@
             return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
         }
     }
+-----------
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private MailHandlingService mailHandlingService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    public void testReplyEmail_WhenEmailActionIsNotDefined_ReturnsBadRequest() throws Exception {
+        // Mocking the input with an undefined email action
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        // Set an undefined action
+        emailNotificationsDTO.setAction("undefined");
+
+        // Mock the UUID
+        UUID uuid = UUID.randomUUID();
+
+        // Perform the method invocation
+        ResponseEntity<ModelApiResponse> responseEntity = mailMessageApiController.replyEmail(emailNotificationsDTO, uuid);
+
+        // Assert that the method returns a ResponseEntity with HttpStatus.BAD_REQUEST
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+}
