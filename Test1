@@ -448,3 +448,31 @@ public class MailHandlingServiceTest {
 }
 ---------------------
 ERROR com.verizon.ucm.interactionmanagement.controller.MailMessageApiRestController - EmailMessageExtractionService# getGlobalSearch#: Exception occured while fetching the search results java.lang.NullPointerException: Cannot invoke "com.verizon.ucm.interactionmanagement.repository.EmailMessageExtractionRepository.findByReferenceId(String)" because "this.emailMessageExtractionRepository" is null for searchId  requestId null uuid {}
+--------------
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    public void testGlobalSearch_WhenNullPointerExceptionOccurs() throws Exception {
+        // Mocking the behavior to throw a NullPointerException when called
+        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
+                .thenThrow(NullPointerException.class);
+
+        // Use assertDoesNotThrow to ensure no exception is thrown from the test method
+        assertDoesNotThrow(() -> mailMessageApiController.globalSearch("id", UUID.randomUUID()));
+    }
+}
