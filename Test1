@@ -446,3 +446,5 @@ public class MailHandlingServiceTest {
         assertDoesNotThrow(() -> mailMessageApiController.globalSearch("id", UUID.randomUUID()));
     }
 }
+---------------------
+ERROR com.verizon.ucm.interactionmanagement.controller.MailMessageApiRestController - EmailMessageExtractionService# getGlobalSearch#: Exception occured while fetching the search results java.lang.NullPointerException: Cannot invoke "com.verizon.ucm.interactionmanagement.repository.EmailMessageExtractionRepository.findByReferenceId(String)" because "this.emailMessageExtractionRepository" is null for searchId  requestId null uuid {}
