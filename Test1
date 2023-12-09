@@ -14,3 +14,61 @@
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.get(0).getFileName() + "\"")
                 .body(file);
     }
+==========
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+public class EmailAttachmentsControllerTest {
+
+    @Mock
+    private EmailAttachmentsRepository emailAttachmentsRepository;
+
+    @InjectMocks
+    private EmailAttachmentsController emailAttachmentsController;
+
+    @Test
+    public void testGetEmailAttachmentDownloadedById_Success() {
+        // Mock data
+        Integer emailMessageId = 1;
+        String fileName = "example.pdf";
+        UUID uuid = UUID.randomUUID();
+        byte[] fileContent = "sample file content".getBytes();
+
+        // Mock the repository behavior
+        List<EmailAttachments> emailAttachments = new ArrayList<>();
+        EmailAttachments attachment = new EmailAttachments();
+        attachment.setFileName(fileName);
+        attachment.setAttachmentFile(fileContent);
+        emailAttachments.add(attachment);
+
+        when(emailAttachmentsRepository.getEmailAttachmentsByEmailMessageId(emailMessageId))
+                .thenReturn(emailAttachments);
+
+        // Create a map for the request
+        Map<String, String> requestMap = new HashMap<>();
+        requestMap.put("fileName", fileName);
+
+        // Call the controller method
+        ResponseEntity<Object> responseEntity = emailAttachmentsController.getEmailAttachmentDownloadedById(emailMessageId, requestMap, uuid);
+
+        // Assert the response
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_OCTET_STREAM, responseEntity.getHeaders().getContentType());
+        assertEquals("attachment; filename=\"" + fileName + "\"", responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION));
+        assertEquals(fileContent, responseEntity.getBody());
+
+        // Verify method invocations
+        verify(emailAttachmentsRepository, times(1)).getEmailAttachmentsByEmailMessageId(emailMessageId);
+    }
+}
