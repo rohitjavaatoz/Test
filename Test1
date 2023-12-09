@@ -365,3 +365,56 @@ public class MailHandlingServiceTest {
         };
     }
 }
+================
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    public void testGlobalSearch_WhenExceptionOccurs_ReturnsNoContent() throws Exception {
+        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
+                .thenThrow(new Exception("Some exception occurred"));
+
+        ResponseEntity<GlobalSearchResponse> responseEntity = mailMessageApiController.globalSearch("id1", UUID.randomUUID());
+
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+        assertEquals(null, responseEntity.getBody());
+
+        responseEntity = mailMessageApiController.globalSearch("id2", UUID.randomUUID());
+
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+        assertEquals(null, responseEntity.getBody());
+    }
+
+    @Test
+    public void testGlobalSearch_WhenExceptionOccurs_LogsError() throws Exception {
+        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
+                .thenThrow(new Exception("Some exception occurred"));
+
+        mailMessageApiController.globalSearch("id", UUID.randomUUID());
+
+        verify(LoggerFactory.getLogger(MailMessageApiController.class)).error(
+                eq("exception in emailMessageExtraction method where referenceIdOrrequestId ="),
+                eq("id"),
+                eq("Exception ="),
+                any(Exception.class),
+                any(UUID.class)
+        );
+    }
+}
