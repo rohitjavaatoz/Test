@@ -13,3 +13,37 @@ public ResponseEntity<ModelApiResponse> updateEmailAttachment(Integer id, EmailA
             modelApiResponse.code(201);
             return new ResponseEntity<>(modelApiResponse, HttpStatus.OK);
     }
+---------------
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class EmailAttachmentsControllerTest {
+
+    @Mock
+    private EmailAttachmentsRepository emailAttachmentsRepository;
+
+    @InjectMocks
+    private EmailAttachmentsController emailAttachmentsController;
+
+    @Test
+    public void testUpdateEmailAttachment_Success() {
+        Integer emailMessageId = 1;
+        EmailAttachments emailAttachments = new EmailAttachments();
+        emailAttachments.setEmailMessageId(emailMessageId);
+        // Set other properties...
+
+        ResponseEntity<ModelApiResponse> responseEntity = emailAttachmentsController.updateEmailAttachment(emailMessageId, emailAttachments);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Updated successfully", responseEntity.getBody().getMessage());
+        assertEquals(201, responseEntity.getBody().getCode());
+
+        verify(emailAttachmentsRepository, times(1)).save(any(EmailAttachments.class));
+    }
+}
