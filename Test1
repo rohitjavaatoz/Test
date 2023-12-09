@@ -559,3 +559,37 @@ public class MailHandlingServiceTest {
     }
 }
 
+===========
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @InjectMocks
+    private MailMessageApiController mailMessageApiController;
+
+    @Test
+    public void testGlobalSearch_WhenNullPointerExceptionOccurs() throws Exception {
+        // Mocking the behavior to throw a NullPointerException when called
+        when(emailMessageExtractionService.getGlobalSearch(anyString(), any(UUID.class)))
+                .thenThrow(NullPointerException.class);
+
+        // Perform the method invocation
+        mailMessageApiController.globalSearch("id", UUID.randomUUID());
+
+        // You can add an assertion to ensure the method returns a ResponseEntity with HttpStatus.NO_CONTENT
+        // Here's an example assertion:
+        ResponseEntity<GlobalSearchResponse> responseEntity = mailMessageApiController.globalSearch("id", UUID.randomUUID());
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+        assertEquals(null, responseEntity.getBody());
+    }
+}
