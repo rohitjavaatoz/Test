@@ -1,80 +1,16 @@
-      @RequestMapping(value = "/message-status/{id}", produces = { "application/json" }, consumes = { "application/json" }, method = RequestMethod.PATCH)
-    public ResponseEntity<ModelApiResponse> updateMessageStatus(Integer id, MessageStatus messageStatus) {
-        ModelApiResponse modelApiResponse = new ModelApiResponse();
-        MessageStatus messageStatusToUpdate = getMessageStatusById(id).getBody();
-        if( messageStatusToUpdate != null){
-            messageStatusToUpdate.setMessageStatusName(messageStatus.getMessageStatusName());
-            messageStatusRepository.save(messageStatusToUpdate);
-            modelApiResponse.message("Updated successfully");
-            modelApiResponse.code(201);
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.OK);
+    @RequestMapping(value = "/email-messages/{emailMessageId}/{action}", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.PATCH)
+  public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHistoryRequest body, String action, UUID uuid) throws Exception {
+        LOGGER.info("MailMessageApiRestController::saveAndUpdateLockHistory: Getting the action as (true or false) saving the lock history table updating the emailmessages table : action", action, uuid);
+        EmailLockResponse emailLockedHistory = new EmailLockResponse();
+        try {
+            if (action != null && lockActions.contains(action.toLowerCase())) {
+                emailLockedHistory = emailMessageExtractionService.saveAndUpdateMailLockHistory(body, action, uuid);
+            } else {
+                throw new Exception("Invalid action " + action + "supplied");
+            }
+        } catch (Exception exe) {
+            LOGGER.error("MailMessageApiRestController::saveAndUpdateLockHistory: exception in saveAndUpdateLockHistory method where action {} Exception {} uuid {}", action, exe, uuid);
+            throw exe;
         }
-        else{
-            modelApiResponse.code(400);
-            modelApiResponse.message("No 'message status' with the '"+id+ "' found");
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
     }
---------------------------
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-public class MessageStatusApiControllerTest {
-
-    @Mock
-    private MessageStatusRepository messageStatusRepository;
-
-    @InjectMocks
-    private MessageStatusApiController messageStatusApiController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    void testUpdateMessageStatus_MessageStatusExists_ReturnsUpdatedResponse() {
-        Integer messageId = 1;
-        MessageStatus messageStatus = new MessageStatus();
-        messageStatus.setMessageStatusName("NewStatus");
-
-        MessageStatus mockedMessageStatusToUpdate = new MessageStatus();
-        mockedMessageStatusToUpdate.setMessageStatusName("OldStatus"); // Existing status before update
-
-        when(messageStatusRepository.findById(messageId)).thenReturn(java.util.Optional.ofNullable(mockedMessageStatusToUpdate));
-
-        ResponseEntity<ModelApiResponse> responseEntity = messageStatusApiController.updateMessageStatus(messageId, messageStatus);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(201, responseEntity.getBody().getCode());
-        assertEquals("Updated successfully", responseEntity.getBody().getMessage());
-
-        assertEquals("NewStatus", mockedMessageStatusToUpdate.getMessageStatusName()); // Ensure status is updated
-        verify(messageStatusRepository, times(1)).save(mockedMessageStatusToUpdate);
-    }
-
-    @Test
-    void testUpdateMessageStatus_MessageStatusNotExists_ReturnsBadRequest() {
-        Integer messageId = 1;
-        MessageStatus messageStatus = new MessageStatus();
-        messageStatus.setMessageStatusName("NewStatus");
-
-        when(messageStatusRepository.findById(messageId)).thenReturn(java.util.Optional.empty());
-
-        ResponseEntity<ModelApiResponse> responseEntity = messageStatusApiController.updateMessageStatus(messageId, messageStatus);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(400, responseEntity.getBody().getCode());
-        assertEquals("No 'message status' with the '1' found", responseEntity.getBody().getMessage());
-    }
-}
