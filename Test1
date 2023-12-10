@@ -20,3 +20,60 @@ public ResponseEntity<Set<MailMessageDTO>> getEmailSearch(EmailSearchRequestDTO 
 		return emailDetails;
 	}
 
+---------------
+public class EmailControllerTest {
+
+    // ... (imports and annotations remain the same)
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @Mock
+    private EmailMessagesService emailMessagesService;
+
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private EmailController emailController;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetEmailSearch_ValidInput_ReturnsEmailDetails() {
+        EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+        UUID uuid = UUID.randomUUID();
+
+        Set<Integer> mockExtractionIds = new HashSet<>();
+        Set<Integer> mockEmailIds = new HashSet<>();
+        Set<MailMessageDTO> mockEmailList = new HashSet<>();
+        when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenReturn(mockExtractionIds);
+        when(emailMessagesService.getEmailMessageIds(request, mockExtractionIds, uuid)).thenReturn(mockEmailIds);
+        when(emailMessagesService.getMatchedEmails(mockEmailIds, request, uuid)).thenReturn(mockEmailList);
+
+        ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
+    public void testGetEmailSearch_ExceptionThrown_ReturnsBadRequest() {
+        EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+        UUID uuid = UUID.randomUUID();
+
+        when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenThrow(new RuntimeException());
+
+        ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+
+        verify(logger, times(1)).error(anyString(), any(), eq(uuid));
+    }
+}
