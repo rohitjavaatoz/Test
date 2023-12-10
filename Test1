@@ -77,3 +77,20 @@ public class EmailControllerTest {
         verify(logger, times(1)).error(anyString(), any(), eq(uuid));
     }
 }
+-------------
+@Test
+public void testGetEmailSearch_NullEmailIds_ReturnsEmptyEmailList() {
+    EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+    UUID uuid = UUID.randomUUID();
+
+    // Mocking empty emailIds
+    Set<Integer> mockExtractionIds = new HashSet<>();
+    when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenReturn(mockExtractionIds);
+    when(emailMessagesService.getEmailMessageIds(request, mockExtractionIds, uuid)).thenReturn(null);
+
+    ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().isEmpty());
+}
