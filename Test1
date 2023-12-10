@@ -1,49 +1,22 @@
-    @RequestMapping(value = "/email-messages/{emailMessageId}/attachments/{attachmentId}", produces = { "application/json" }, consumes = { "application/json" }, method = RequestMethod.PATCH)
-public ResponseEntity<ModelApiResponse> updateEmailAttachment(Integer id, EmailAttachments emailAttachments) {
-        ModelApiResponse modelApiResponse = new ModelApiResponse();
-        EmailAttachments emailAttachmentsToUpdate = new EmailAttachments();
-       // if( emailAttachmentsToUpdate != null){
-            emailAttachmentsToUpdate.setEmailMessageId(emailAttachments.getEmailMessageId());
-            emailAttachmentsToUpdate.setFileName(emailAttachments.getFileName());
-            emailAttachmentsToUpdate.setFileType(emailAttachments.getFileType());
-            emailAttachmentsToUpdate.setFileSize(emailAttachments.getFileSize());
-            emailAttachmentsToUpdate.setContentDisposition(emailAttachments.getContentDisposition());
-            emailAttachmentsRepository.save(emailAttachmentsToUpdate);
-            modelApiResponse.message("Updated successfully");
-            modelApiResponse.code(201);
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.OK);
-    }
----------------
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+	@RequestMapping(value = "/email-messages/search", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.POST)
+public ResponseEntity<Set<MailMessageDTO>> getEmailSearch(EmailSearchRequestDTO body, UUID uuid){
+		Set<MailMessageDTO> emailList = new HashSet<MailMessageDTO>();
+		ResponseEntity<Set<MailMessageDTO>> emailDetails = new ResponseEntity<>(new HashSet<MailMessageDTO>(), HttpStatus.OK);
+		LOGGER.info("getEmailSearch: Fetching the Emails list by given input {} : UUID ={}",body,uuid);
+		try {
+			Set<Integer> emailExtractionIds = emailMessageExtractionService.getEmailExtractionIds(body, uuid);
+			Set<Integer> emailIds = emailMessagesService.getEmailMessageIds(body, emailExtractionIds, uuid);
+			LOGGER.info("getEmailSearch: Updated the EmailIds List {} : UUID ={}", emailIds, uuid);
+			if (null != emailIds && !emailIds.isEmpty())
+				emailList.addAll(emailMessagesService.getMatchedEmails(emailIds, body, uuid));
+		}
+		catch(Exception e){
+			LOGGER.info("getEmailSearch: Error while retrieving the EmailList  : e={}, UUID ={}",e,uuid);
+			emailDetails.getStatusCode().is4xxClientError();
+			return new ResponseEntity<>(new HashSet<MailMessageDTO>(), HttpStatus.BAD_REQUEST);
+		}
+		emailDetails.getBody().addAll(emailList);
+		LOGGER.info("getEmailSearch: Final EmailDetailsList {} added to response : UUID ={}",emailList,uuid);
+		return emailDetails;
+	}
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
-public class EmailAttachmentsControllerTest {
-
-    @Mock
-    private EmailAttachmentsRepository emailAttachmentsRepository;
-
-    @InjectMocks
-    private EmailAttachmentsController emailAttachmentsController;
-
-    @Test
-    public void testUpdateEmailAttachment_Success() {
-        Integer emailMessageId = 1;
-        EmailAttachments emailAttachments = new EmailAttachments();
-        emailAttachments.setEmailMessageId(emailMessageId);
-        // Set other properties...
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailAttachmentsController.updateEmailAttachment(emailMessageId, emailAttachments);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("Updated successfully", responseEntity.getBody().getMessage());
-        assertEquals(201, responseEntity.getBody().getCode());
-
-        verify(emailAttachmentsRepository, times(1)).save(any(EmailAttachments.class));
-    }
-}
