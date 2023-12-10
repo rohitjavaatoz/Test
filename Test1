@@ -1,111 +1,18 @@
-    @RequestMapping(value = "/email-labels/{labelId}", produces = { "application/json" }, method = RequestMethod.PATCH)
-@Override
-    public ResponseEntity<ModelApiResponse> editUserDefinedLabels(UserLabelsRequest editLabelsRequest, UUID uuid) {
-        LOGGER.info(
-                "EmailLabelsApiRestController# editUserDefinedLabels#: labels={},uuid={}",editLabelsRequest,uuid);
-        ResponseEntity<ModelApiResponse> responseEntity = null;
+    @RequestMapping(value = "/email-messages/{emailMessageId}/labels", produces = { "application/json" }, method = RequestMethod.PATCH)
+ public ResponseEntity<ModelApiResponse> setEmailMessageLabels(Integer id, UUID uuid) {
+        LOGGER.info("setEmailMessageLabels: Assigning Labels for the email message id {}:UUID={}",id,uuid);
         ModelApiResponse modelApiResponse = new ModelApiResponse();
-        EmailLabelsEntity emailLabels=null;
-        try{
-            if(editLabelsRequest.getEmailLabelId() != null && editLabelsRequest.getEmailLabelName() != null) {
-                emailLabels=emailLabelsService.editLabels(editLabelsRequest, uuid);
-                if (emailLabels != null) {
-                    LOGGER.info(
-                            "EmailLabelsApiRestController# editUserDefinedLabels#: Email label was updated successfully {},uuid={}",
-                            emailLabels, uuid);
-                    modelApiResponse.setCode(201);
-                    modelApiResponse.setMessage(editLabelsRequest.getEmailLabelName()+" successfully edited");
-                    responseEntity = new ResponseEntity<>(modelApiResponse, HttpStatus.OK);
-                }
-
-            }
-            else {
-                LOGGER.info(
-                        "EmailLabelsApiRestController# editUserDefinedLabels#: Email Label Id and name is empty,uuid={}",
-                        uuid);
-                modelApiResponse.setCode(400);
-                modelApiResponse.setMessage("Email Label Id and Name cannot be null");
-                responseEntity = new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
-            }
+        try {
+            List<EmailMessageLabelsEntity> emailMessageLabelsEntityResponse = emailMessageLabelService.assignLabelNamestoEmail(id, uuid);
+            LOGGER.info("setEmailMessageLabels: Labels was created for Email Message Id {},labels={}:UUID={}",id, emailMessageLabelsEntityResponse,uuid);
+            modelApiResponse.setMessage("Labels was created for Email Message Id");
         }
-        catch(Exception exe){
-            LOGGER.error("EmailLabelsApiRestController# editUserDefinedLabels#:Error while editing Email label ={}:UUID={}", exe, uuid);
+        catch(Exception e){
+            LOGGER.info("setEmailMessageLabels:Error While creating Message Labels of Email Message Id {},Error={}:UUID={}",id,e,uuid);
+            modelApiResponse.code(400);
+            modelApiResponse.message("Error while updating the email message");
+            return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
         }
-        return  responseEntity;
+        modelApiResponse.setCode(201);
+        return new ResponseEntity<>(modelApiResponse, HttpStatus.CREATED);
     }
-------------
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-public class EmailLabelsApiRestControllerTest {
-
-    @Mock
-    private EmailLabelsService emailLabelsService;
-
-    @Mock
-    private Logger logger;
-
-    @InjectMocks
-    private EmailLabelsApiRestController emailLabelsApiRestController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    void testEditUserDefinedLabels_LabelUpdated_ReturnsModelApiResponse() {
-        UserLabelsRequest editLabelsRequest = new UserLabelsRequest();
-        editLabelsRequest.setEmailLabelId("labelId");
-        editLabelsRequest.setEmailLabelName("NewLabel");
-        UUID uuid = UUID.randomUUID();
-
-        EmailLabelsEntity mockedEmailLabels = new EmailLabelsEntity(); // Create a mocked EmailLabelsEntity object
-
-        when(emailLabelsService.editLabels(editLabelsRequest, uuid)).thenReturn(mockedEmailLabels);
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailLabelsApiRestController.editUserDefinedLabels(editLabelsRequest, uuid);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(201, responseEntity.getBody().getCode());
-        assertEquals("NewLabel successfully edited", responseEntity.getBody().getMessage());
-    }
-
-    @Test
-    void testEditUserDefinedLabels_LabelIdOrNameEmpty_ReturnsBadRequest() {
-        UserLabelsRequest editLabelsRequest = new UserLabelsRequest();
-        UUID uuid = UUID.randomUUID();
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailLabelsApiRestController.editUserDefinedLabels(editLabelsRequest, uuid);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(400, responseEntity.getBody().getCode());
-        assertEquals("Email Label Id and Name cannot be null", responseEntity.getBody().getMessage());
-    }
-
-    @Test
-    void testEditUserDefinedLabels_ExceptionThrown_ReturnsNullResponseEntity() {
-        UserLabelsRequest editLabelsRequest = new UserLabelsRequest();
-        editLabelsRequest.setEmailLabelId("labelId");
-        editLabelsRequest.setEmailLabelName("NewLabel");
-        UUID uuid = UUID.randomUUID();
-
-        when(emailLabelsService.editLabels(editLabelsRequest, uuid)).thenThrow(new RuntimeException());
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailLabelsApiRestController.editUserDefinedLabels(editLabelsRequest, uuid);
-
-        assertNull(responseEntity);
-        // Add assertions or handling based on the behavior of returning null on exception
-    }
-}
