@@ -94,3 +94,115 @@ public void testGetEmailSearch_NullEmailIds_ReturnsEmptyEmailList() {
     assertNotNull(response.getBody());
     assertTrue(response.getBody().isEmpty());
 }
+--------------
+package com.yourpackage.test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class EmailControllerTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @Mock
+    private EmailMessagesService emailMessagesService;
+
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private EmailController emailController;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetEmailSearch_ValidInput_ReturnsEmailDetails() {
+        EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+        UUID uuid = UUID.randomUUID();
+
+        Set<Integer> mockExtractionIds = new HashSet<>();
+        Set<Integer> mockEmailIds = new HashSet<>();
+        Set<MailMessageDTO> mockEmailList = new HashSet<>();
+        when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenReturn(mockExtractionIds);
+        when(emailMessagesService.getEmailMessageIds(request, mockExtractionIds, uuid)).thenReturn(mockEmailIds);
+        when(emailMessagesService.getMatchedEmails(mockEmailIds, request, uuid)).thenReturn(mockEmailList);
+
+        ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
+    public void testGetEmailSearch_ExceptionThrown_ReturnsBadRequest() {
+        EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+        UUID uuid = UUID.randomUUID();
+
+        when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenThrow(new RuntimeException());
+
+        ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+
+        verify(logger, times(1)).error(anyString(), any(), eq(uuid));
+    }
+
+    @Test
+    public void testGetEmailSearch_NullEmailIds_ReturnsEmptyEmailList() {
+        EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+        UUID uuid = UUID.randomUUID();
+
+        Set<Integer> mockExtractionIds = new HashSet<>();
+        when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenReturn(mockExtractionIds);
+        when(emailMessagesService.getEmailMessageIds(request, mockExtractionIds, uuid)).thenReturn(null);
+
+        ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
+    public void testGetEmailSearch_NonEmptyEmailIds_ReturnsMatchedEmailList() {
+        EmailSearchRequestDTO request = new EmailSearchRequestDTO();
+        UUID uuid = UUID.randomUUID();
+
+        Set<Integer> mockExtractionIds = new HashSet<>();
+        Set<Integer> mockEmailIds = new HashSet<>();
+        mockEmailIds.add(1); // Adding a sample email ID
+        when(emailMessageExtractionService.getEmailExtractionIds(request, uuid)).thenReturn(mockExtractionIds);
+        when(emailMessagesService.getEmailMessageIds(request, mockExtractionIds, uuid)).thenReturn(mockEmailIds);
+
+        Set<MailMessageDTO> mockMatchedEmails = new HashSet<>();
+        // Add some mocked MailMessageDTO objects to the mockMatchedEmails set
+
+        when(emailMessagesService.getMatchedEmails(mockEmailIds, request, uuid)).thenReturn(mockMatchedEmails);
+
+        ResponseEntity<Set<MailMessageDTO>> response = emailController.getEmailSearch(request, uuid);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(mockMatchedEmails.size(), response.getBody().size());
+    }
+}
