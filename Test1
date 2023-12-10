@@ -1,89 +1,16 @@
-    @RequestMapping(value = "/email-messages/{emailMessageid}/email-extraction/{id}", produces = { "application/json" }, consumes = { "application/json" }, method = RequestMethod.POST)
-public ResponseEntity<ModelApiResponse> messageExtractionAudit(EditAttributesDTO editAttributesDTO,@RequestHeader("UUID") UUID uuid){
-        ModelApiResponse modelApiResponse = new ModelApiResponse();
-        boolean[] response;
-        EmailLockResponse emailLockResponse = emailMessageExtractionService.getEmailLockInfo(editAttributesDTO, uuid);
-        Integer emailMessageId = editAttributesDTO.getEmailMessageId();
+    @RequestMapping(value = "/email-messages/global-search/{globalId}", produces = {"application/json"}, method = RequestMethod.GET)
+public ResponseEntity<GlobalSearchResponse> globalSearch(String id, UUID uuid) {
+        LOGGER.info("globalSearch: Getting the request id or reference id : referenceIdOrrequestId", id, uuid);
+        GlobalSearchResponse globalSearchResponse = null;
         try {
-			if (emailLockResponse != null && ((emailLockResponse.getLockedBy() == null)
-					|| (emailLockResponse.isLocked() && emailLockResponse.getLockedBy().equals(editAttributesDTO.getModifiedBy())))) {
-				  response = emailMessagesService.editAtrributes(editAttributesDTO, uuid);
-                if (response[0]) {
-                    modelApiResponse.message("Email Message updated successfully for email message "+emailMessageId);
-                    LOGGER.info("messageExtractionAudit: Email message attributes updated successfully for emailMessageId {}: uuid={}", emailMessageId, uuid);
-                } else if (response[1]) {
-                    modelApiResponse.message("Network Elements deleted successfully");
-                    LOGGER.info("messageExtractionAudit: Network Elements deleted successfully for emailMessageId {}: uuid={}", emailMessageId, uuid);
-                } else {
-                    LOGGER.error("messageExtractionAudit: Error while updating the email message : uuid={}", uuid);
-                    throw new Exception("Error while updating the email message");
-                }
-            }else if(emailLockResponse != null && emailLockResponse.getLockedBy() != null){
-                LOGGER.error("messageExtractionAudit: Error while accessing the Locked email {}: uuid={}", emailMessageId, uuid);
-                modelApiResponse.code(400);
-				modelApiResponse.message("Unable to edit message " + editAttributesDTO.getEmailMessageId()
-						+ " as Email is locked by " + emailLockResponse.getLockedBy());
-				return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
-            }
+            globalSearchResponse = emailMessageExtractionService.getGlobalSearch(id, uuid);
+        } catch (Exception exe) {
+            LOGGER.error("exception in emailMessageExtraction method where referenceIdOrrequestId =", id, "Exception =", exe, uuid);
+            return new ResponseEntity<>(globalSearchResponse, HttpStatus.NO_CONTENT);
         }
-        catch (Exception e){
-            modelApiResponse.code(400);
-            modelApiResponse.message("Error while updating the email message "+emailMessageId);
-            return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
+        if (Optional.ofNullable(globalSearchResponse).isPresent()) {
+            return new ResponseEntity<>(globalSearchResponse, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(globalSearchResponse, HttpStatus.NO_CONTENT);
         }
-        modelApiResponse.code(201);
-
-        return new ResponseEntity<>(modelApiResponse, HttpStatus.CREATED);
     }
-----------
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-public class EmailMessageAuditTest {
-
-    @Mock
-    private EmailMessageExtractionService emailMessageExtractionService;
-
-    @Mock
-    private Logger logger;
-
-    @InjectMocks
-    private EmailMessageAuditController emailMessageAuditController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    void testMessageExtractionAudit_LockedEmail_ReturnsBadRequest() {
-        EditAttributesDTO editAttributesDTO = new EditAttributesDTO();
-        UUID uuid = UUID.randomUUID();
-
-        EmailLockResponse mockedEmailLockResponse = new EmailLockResponse();
-        mockedEmailLockResponse.setLockedBy("John Doe"); // Simulating a locked email
-
-        when(emailMessageExtractionService.getEmailLockInfo(editAttributesDTO, uuid)).thenReturn(mockedEmailLockResponse);
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailMessageAuditController.messageExtractionAudit(editAttributesDTO, uuid);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(400, responseEntity.getBody().getCode());
-        assertTrue(responseEntity.getBody().getMessage().contains("Unable to edit message"));
-        assertTrue(responseEntity.getBody().getMessage().contains("as Email is locked by John Doe"));
-        // Add additional assertions if needed to further validate the responseEntity
-    }
-}
-
