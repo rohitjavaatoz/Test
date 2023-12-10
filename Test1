@@ -14,3 +14,72 @@
         }
         return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
     }
+------------
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class MailMessageApiRestControllerTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private MailMessageApiRestController mailMessageApiRestController;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testSaveAndUpdateLockHistory_ValidAction_ReturnsEmailLockResponse() throws Exception {
+        EmailLockHistoryRequest body = new EmailLockHistoryRequest();
+        String action = "true"; // Valid action
+        UUID uuid = UUID.randomUUID();
+
+        EmailLockResponse mockedEmailLockedHistory = new EmailLockResponse(); // Create a mocked EmailLockResponse object
+
+        Set<String> lockActions = new HashSet<>();
+        lockActions.add("true");
+        lockActions.add("false");
+        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(body, action, uuid)).thenReturn(mockedEmailLockedHistory);
+
+        ResponseEntity<EmailLockResponse> responseEntity = mailMessageApiRestController.saveAndUpdateLockHistory(body, action, uuid);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        // Add assertions to match the responseEntity with mockedEmailLockedHistory
+    }
+
+    @Test
+    public void testSaveAndUpdateLockHistory_InvalidAction_ThrowsException() {
+        EmailLockHistoryRequest body = new EmailLockHistoryRequest();
+        String action = "invalidAction"; // Invalid action
+        UUID uuid = UUID.randomUUID();
+
+        Set<String> lockActions = new HashSet<>();
+        lockActions.add("true");
+        lockActions.add("false");
+
+        assertThrows(Exception.class, () ->
+                mailMessageApiRestController.saveAndUpdateLockHistory(body, action, uuid)
+        );
+        // Add assertions or handling based on the behavior of throwing an exception for invalid action
+    }
+}
