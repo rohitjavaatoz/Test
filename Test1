@@ -1,83 +1,17 @@
-    @RequestMapping(value = "/email-messages/{emailMessageId}/labels", produces = { "application/json" }, method = RequestMethod.PATCH)
- public ResponseEntity<ModelApiResponse> setEmailMessageLabels(Integer id, UUID uuid) {
-        LOGGER.info("setEmailMessageLabels: Assigning Labels for the email message id {}:UUID={}",id,uuid);
+      @RequestMapping(value = "/message-status/{id}", produces = { "application/json" }, consumes = { "application/json" }, method = RequestMethod.PATCH)
+    public ResponseEntity<ModelApiResponse> updateMessageStatus(Integer id, MessageStatus messageStatus) {
         ModelApiResponse modelApiResponse = new ModelApiResponse();
-        try {
-            List<EmailMessageLabelsEntity> emailMessageLabelsEntityResponse = emailMessageLabelService.assignLabelNamestoEmail(id, uuid);
-            LOGGER.info("setEmailMessageLabels: Labels was created for Email Message Id {},labels={}:UUID={}",id, emailMessageLabelsEntityResponse,uuid);
-            modelApiResponse.setMessage("Labels was created for Email Message Id");
+        MessageStatus messageStatusToUpdate = getMessageStatusById(id).getBody();
+        if( messageStatusToUpdate != null){
+            messageStatusToUpdate.setMessageStatusName(messageStatus.getMessageStatusName());
+            messageStatusRepository.save(messageStatusToUpdate);
+            modelApiResponse.message("Updated successfully");
+            modelApiResponse.code(201);
+            return new ResponseEntity<>(modelApiResponse, HttpStatus.OK);
         }
-        catch(Exception e){
-            LOGGER.info("setEmailMessageLabels:Error While creating Message Labels of Email Message Id {},Error={}:UUID={}",id,e,uuid);
+        else{
             modelApiResponse.code(400);
-            modelApiResponse.message("Error while updating the email message");
+            modelApiResponse.message("No 'message status' with the '"+id+ "' found");
             return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
         }
-        modelApiResponse.setCode(201);
-        return new ResponseEntity<>(modelApiResponse, HttpStatus.CREATED);
     }
-----------------
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-public class EmailMessageLabelsApiControllerTest {
-
-    @Mock
-    private EmailMessageLabelService emailMessageLabelService;
-
-    @Mock
-    private Logger logger;
-
-    @InjectMocks
-    private EmailMessageLabelsApiController emailMessageLabelsApiController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    void testSetEmailMessageLabels_LabelsAssigned_ReturnsCreatedResponse() {
-        Integer emailMessageId = 1;
-        UUID uuid = UUID.randomUUID();
-
-        List<EmailMessageLabelsEntity> mockedLabelsEntityList = new ArrayList<>(); // Create a mocked list of EmailMessageLabelsEntity
-
-        when(emailMessageLabelService.assignLabelNamestoEmail(emailMessageId, uuid)).thenReturn(mockedLabelsEntityList);
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailMessageLabelsApiController.setEmailMessageLabels(emailMessageId, uuid);
-
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(201, responseEntity.getBody().getCode());
-        assertEquals("Labels was created for Email Message Id", responseEntity.getBody().getMessage());
-    }
-
-    @Test
-    void testSetEmailMessageLabels_ExceptionThrown_ReturnsBadRequest() {
-        Integer emailMessageId = 1;
-        UUID uuid = UUID.randomUUID();
-
-        when(emailMessageLabelService.assignLabelNamestoEmail(emailMessageId, uuid)).thenThrow(new RuntimeException());
-
-        ResponseEntity<ModelApiResponse> responseEntity = emailMessageLabelsApiController.setEmailMessageLabels(emailMessageId, uuid);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals(400, responseEntity.getBody().getCode());
-        assertEquals("Error while updating the email message", responseEntity.getBody().getMessage());
-    }
-}
