@@ -33,3 +33,79 @@
         }
         return  responseEntity;
     }
+------------
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class EmailLabelsApiRestControllerTest {
+
+    @Mock
+    private EmailLabelsService emailLabelsService;
+
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private EmailLabelsApiRestController emailLabelsApiRestController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testEditUserDefinedLabels_LabelUpdated_ReturnsModelApiResponse() {
+        UserLabelsRequest editLabelsRequest = new UserLabelsRequest();
+        editLabelsRequest.setEmailLabelId("labelId");
+        editLabelsRequest.setEmailLabelName("NewLabel");
+        UUID uuid = UUID.randomUUID();
+
+        EmailLabelsEntity mockedEmailLabels = new EmailLabelsEntity(); // Create a mocked EmailLabelsEntity object
+
+        when(emailLabelsService.editLabels(editLabelsRequest, uuid)).thenReturn(mockedEmailLabels);
+
+        ResponseEntity<ModelApiResponse> responseEntity = emailLabelsApiRestController.editUserDefinedLabels(editLabelsRequest, uuid);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(201, responseEntity.getBody().getCode());
+        assertEquals("NewLabel successfully edited", responseEntity.getBody().getMessage());
+    }
+
+    @Test
+    void testEditUserDefinedLabels_LabelIdOrNameEmpty_ReturnsBadRequest() {
+        UserLabelsRequest editLabelsRequest = new UserLabelsRequest();
+        UUID uuid = UUID.randomUUID();
+
+        ResponseEntity<ModelApiResponse> responseEntity = emailLabelsApiRestController.editUserDefinedLabels(editLabelsRequest, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(400, responseEntity.getBody().getCode());
+        assertEquals("Email Label Id and Name cannot be null", responseEntity.getBody().getMessage());
+    }
+
+    @Test
+    void testEditUserDefinedLabels_ExceptionThrown_ReturnsNullResponseEntity() {
+        UserLabelsRequest editLabelsRequest = new UserLabelsRequest();
+        editLabelsRequest.setEmailLabelId("labelId");
+        editLabelsRequest.setEmailLabelName("NewLabel");
+        UUID uuid = UUID.randomUUID();
+
+        when(emailLabelsService.editLabels(editLabelsRequest, uuid)).thenThrow(new RuntimeException());
+
+        ResponseEntity<ModelApiResponse> responseEntity = emailLabelsApiRestController.editUserDefinedLabels(editLabelsRequest, uuid);
+
+        assertNull(responseEntity);
+        // Add assertions or handling based on the behavior of returning null on exception
+    }
+}
