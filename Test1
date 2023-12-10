@@ -35,3 +35,55 @@ public ResponseEntity<ModelApiResponse> messageExtractionAudit(EditAttributesDTO
 
         return new ResponseEntity<>(modelApiResponse, HttpStatus.CREATED);
     }
+----------
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class EmailMessageAuditTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private EmailMessageAuditController emailMessageAuditController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testMessageExtractionAudit_LockedEmail_ReturnsBadRequest() {
+        EditAttributesDTO editAttributesDTO = new EditAttributesDTO();
+        UUID uuid = UUID.randomUUID();
+
+        EmailLockResponse mockedEmailLockResponse = new EmailLockResponse();
+        mockedEmailLockResponse.setLockedBy("John Doe"); // Simulating a locked email
+
+        when(emailMessageExtractionService.getEmailLockInfo(editAttributesDTO, uuid)).thenReturn(mockedEmailLockResponse);
+
+        ResponseEntity<ModelApiResponse> responseEntity = emailMessageAuditController.messageExtractionAudit(editAttributesDTO, uuid);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(400, responseEntity.getBody().getCode());
+        assertTrue(responseEntity.getBody().getMessage().contains("Unable to edit message"));
+        assertTrue(responseEntity.getBody().getMessage().contains("as Email is locked by John Doe"));
+        // Add additional assertions if needed to further validate the responseEntity
+    }
+}
+
