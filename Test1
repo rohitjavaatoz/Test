@@ -14,3 +14,64 @@ public ResponseEntity<GlobalSearchResponse> globalSearch(String id, UUID uuid) {
             return new ResponseEntity<>(globalSearchResponse, HttpStatus.NO_CONTENT);
         }
     }
+-------------
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class GlobalSearchControllerTest {
+
+    @Mock
+    private EmailMessageExtractionService emailMessageExtractionService;
+
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private GlobalSearchController globalSearchController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testGlobalSearch_ValidResponse_PresentsData_ReturnsOK() {
+        String id = "sampleId";
+        UUID uuid = UUID.randomUUID();
+
+        GlobalSearchResponse mockedGlobalSearchResponse = new GlobalSearchResponse(); // Create a mocked GlobalSearchResponse object
+
+        when(emailMessageExtractionService.getGlobalSearch(id, uuid)).thenReturn(mockedGlobalSearchResponse);
+
+        ResponseEntity<GlobalSearchResponse> responseEntity = globalSearchController.globalSearch(id, uuid);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        // Add assertions or handling to match the responseEntity with mockedGlobalSearchResponse
+    }
+
+    @Test
+    void testGlobalSearch_NoData_ReturnsNoContent() {
+        String id = "nonExistingId";
+        UUID uuid = UUID.randomUUID();
+
+        when(emailMessageExtractionService.getGlobalSearch(id, uuid)).thenReturn(null); // Simulating no data found
+
+        ResponseEntity<GlobalSearchResponse> responseEntity = globalSearchController.globalSearch(id, uuid);
+
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+        // Add assertions or handling for no content scenario
+    }
+}
