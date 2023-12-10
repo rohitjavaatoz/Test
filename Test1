@@ -1,85 +1,37 @@
-    @RequestMapping(value = "/email-messages/{emailMessageId}/{action}", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.PATCH)
-  public ResponseEntity<EmailLockResponse> saveAndUpdateLockHistory(EmailLockHistoryRequest body, String action, UUID uuid) throws Exception {
-        LOGGER.info("MailMessageApiRestController::saveAndUpdateLockHistory: Getting the action as (true or false) saving the lock history table updating the emailmessages table : action", action, uuid);
-        EmailLockResponse emailLockedHistory = new EmailLockResponse();
+    @RequestMapping(value = "/email-messages/{emailMessageid}/email-extraction/{id}", produces = { "application/json" }, consumes = { "application/json" }, method = RequestMethod.POST)
+public ResponseEntity<ModelApiResponse> messageExtractionAudit(EditAttributesDTO editAttributesDTO,@RequestHeader("UUID") UUID uuid){
+        ModelApiResponse modelApiResponse = new ModelApiResponse();
+        boolean[] response;
+        EmailLockResponse emailLockResponse = emailMessageExtractionService.getEmailLockInfo(editAttributesDTO, uuid);
+        Integer emailMessageId = editAttributesDTO.getEmailMessageId();
         try {
-            if (action != null && lockActions.contains(action.toLowerCase())) {
-                emailLockedHistory = emailMessageExtractionService.saveAndUpdateMailLockHistory(body, action, uuid);
-            } else {
-                throw new Exception("Invalid action " + action + "supplied");
+			if (emailLockResponse != null && ((emailLockResponse.getLockedBy() == null)
+					|| (emailLockResponse.isLocked() && emailLockResponse.getLockedBy().equals(editAttributesDTO.getModifiedBy())))) {
+				  response = emailMessagesService.editAtrributes(editAttributesDTO, uuid);
+                if (response[0]) {
+                    modelApiResponse.message("Email Message updated successfully for email message "+emailMessageId);
+                    LOGGER.info("messageExtractionAudit: Email message attributes updated successfully for emailMessageId {}: uuid={}", emailMessageId, uuid);
+                } else if (response[1]) {
+                    modelApiResponse.message("Network Elements deleted successfully");
+                    LOGGER.info("messageExtractionAudit: Network Elements deleted successfully for emailMessageId {}: uuid={}", emailMessageId, uuid);
+                } else {
+                    LOGGER.error("messageExtractionAudit: Error while updating the email message : uuid={}", uuid);
+                    throw new Exception("Error while updating the email message");
+                }
+            }else if(emailLockResponse != null && emailLockResponse.getLockedBy() != null){
+                LOGGER.error("messageExtractionAudit: Error while accessing the Locked email {}: uuid={}", emailMessageId, uuid);
+                modelApiResponse.code(400);
+				modelApiResponse.message("Unable to edit message " + editAttributesDTO.getEmailMessageId()
+						+ " as Email is locked by " + emailLockResponse.getLockedBy());
+				return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
             }
-        } catch (Exception exe) {
-            LOGGER.error("MailMessageApiRestController::saveAndUpdateLockHistory: exception in saveAndUpdateLockHistory method where action {} Exception {} uuid {}", action, exe, uuid);
-            throw exe;
         }
-        return new ResponseEntity<>(emailLockedHistory, HttpStatus.OK);
+        catch (Exception e){
+            modelApiResponse.code(400);
+            modelApiResponse.message("Error while updating the email message "+emailMessageId);
+            return new ResponseEntity<>(modelApiResponse, HttpStatus.BAD_REQUEST);
+        }
+        modelApiResponse.code(201);
+
+        return new ResponseEntity<>(modelApiResponse, HttpStatus.CREATED);
     }
-------------
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-public class MailMessageApiRestControllerTest {
-
-    @Mock
-    private EmailMessageExtractionService emailMessageExtractionService;
-
-    @Mock
-    private Logger logger;
-
-    @InjectMocks
-    private MailMessageApiRestController mailMessageApiRestController;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    public void testSaveAndUpdateLockHistory_ValidAction_ReturnsEmailLockResponse() throws Exception {
-        EmailLockHistoryRequest body = new EmailLockHistoryRequest();
-        String action = "true"; // Valid action
-        UUID uuid = UUID.randomUUID();
-
-        EmailLockResponse mockedEmailLockedHistory = new EmailLockResponse(); // Create a mocked EmailLockResponse object
-
-        Set<String> lockActions = new HashSet<>();
-        lockActions.add("true");
-        lockActions.add("false");
-        when(emailMessageExtractionService.saveAndUpdateMailLockHistory(body, action, uuid)).thenReturn(mockedEmailLockedHistory);
-
-        ResponseEntity<EmailLockResponse> responseEntity = mailMessageApiRestController.saveAndUpdateLockHistory(body, action, uuid);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        // Add assertions to match the responseEntity with mockedEmailLockedHistory
-    }
-
-    @Test
-    public void testSaveAndUpdateLockHistory_InvalidAction_ThrowsException() {
-        EmailLockHistoryRequest body = new EmailLockHistoryRequest();
-        String action = "invalidAction"; // Invalid action
-        UUID uuid = UUID.randomUUID();
-
-        Set<String> lockActions = new HashSet<>();
-        lockActions.add("true");
-        lockActions.add("false");
-
-        assertThrows(Exception.class, () ->
-                mailMessageApiRestController.saveAndUpdateLockHistory(body, action, uuid)
-        );
-        // Add assertions or handling based on the behavior of throwing an exception for invalid action
-    }
-}
