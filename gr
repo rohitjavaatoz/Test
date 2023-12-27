@@ -149,84 +149,6 @@ public class DashBoardProgressTrackerSummaryService {
 
 }
 ======================================
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
-public class DashBoardProgressTrackerSummaryServiceTest {
-
-    @Mock
-    private EmailMessageSearchRepository emailMessageSearchRepository;
-
-    @Mock
-    private DashBoardSummaryHandler dashBoardSummaryHandler;
-
-    @Mock
-    private EmailMessageLabelsRepository emailMessageLabelsRepository;
-
-    @InjectMocks
-    private DashBoardProgressTrackerSummaryService dashboardService;
-
-    @Test
-    public void testGetDashBoardProgressTrackerSummary_Success() throws Exception {
-        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
-                .thenReturn(getMockedAutoProcessedEmails());
-        when(emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek())
-                .thenReturn(getMockedUnProcessedEmails());
-
-        List<ProgressTrackerSummaryResponse> result = dashboardService.getDashBoardProgressTrackerSummary(UUID.randomUUID());
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testGetDashBoardProgressTrackerSummary_ExceptionHandling() {
-        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
-                .thenThrow(new RuntimeException("Simulated exception"));
-
-        List<ProgressTrackerSummaryResponse> result = dashboardService.getDashBoardProgressTrackerSummary(UUID.randomUUID());
-
-        assertNull(result);
-    }
-
-    @Test
-    public void testSearchDashBoardProgressTrackerSummary_AutoProcessed() {
-        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
-                .thenReturn(getMockedAutoProcessedEmails());
-
-        Map<String, Long> result = Whitebox.invokeMethod(dashboardService, "searchDashBoardProgressTrackerSummary", SearchConstants.AUTOMATICALLY_PROCESSED);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testSearchDashBoardProgressTrackerSummary_UnProcessed() {
-        when(emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek())
-                .thenReturn(getMockedUnProcessedEmails());
-
-        Map<String, Long> result = Whitebox.invokeMethod(dashboardService, "searchDashBoardProgressTrackerSummary", SearchConstants.UNPROCESSED);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-    }
-
-    private List<Object[]> getMockedAutoProcessedEmails() {
-        List<Object[]> mockedData = new ArrayList<>();
-        mockedData.add(new Object[]{"2023-12-25", 10L});
-        mockedData.add(new Object[]{"2023-12-26", 15L});
-        return mockedData;
-    }
-
-    private List<Object[]> getMockedUnProcessedEmails() {
-        List<Object[]> mockedData = new ArrayList<>();
-        mockedData.add(new Object[]{"2023-12-25", 5L});
-        mockedData.add(new Object[]{"2023-12-26", 8L});
-        return mockedData;
-    }
-}
-==============
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -236,49 +158,23 @@ public class DashBoardProgressTrackerSummaryServiceTest {
     // ... (existing mocked fields and annotations)
 
     @Test
-    public void testGetDashBoardProgressTrackerSummary_Success() throws Exception {
-        // Existing test for successful scenario
-    }
+    public void testDayMonthKeysPopulation() throws Exception {
+        Map<String, Long> autoProcessedMap = new HashMap<>();
+        autoProcessedMap.put("2023-12-25", 5L);
 
-    @Test
-    public void testGetDashBoardProgressTrackerSummary_EmptyMaps() throws Exception {
-        // Existing test for empty maps scenario
-    }
+        Map<String, Long> unProcessedMap = new HashMap<>();
+        unProcessedMap.put("2023-12-26", 8L);
 
-    @Test
-    public void testGetDashBoardProgressTrackerSummary_CatchInterruptedException() {
-        // Existing test for InterruptedException handling
-    }
-
-    @Test
-    public void testSearchDashBoardProgressTrackerSummary_AutoProcessed() throws Exception {
-        // Test for auto-processed emails
         when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
                 .thenReturn(getMockedAutoProcessedEmails());
-
-        Map<String, Long> result = invokePrivateMethod("searchDashBoardProgressTrackerSummary", SearchConstants.AUTOMATICALLY_PROCESSED);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testSearchDashBoardProgressTrackerSummary_UnProcessed() throws Exception {
-        // Test for unprocessed emails
         when(emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek())
                 .thenReturn(getMockedUnProcessedEmails());
 
-        Map<String, Long> result = invokePrivateMethod("searchDashBoardProgressTrackerSummary", SearchConstants.UNPROCESSED);
+        List<ProgressTrackerSummaryResponse> result = dashboardService.getDashBoardProgressTrackerSummary(UUID.randomUUID());
 
         assertNotNull(result);
         assertEquals(2, result.size());
     }
 
-    // Existing methods getMockedAutoProcessedEmails() and getMockedUnProcessedEmails()
-
-    private Map<String, Long> invokePrivateMethod(String methodName, String param) throws Exception {
-        Method method = DashBoardProgressTrackerSummaryService.class.getDeclaredMethod(methodName, String.class);
-        method.setAccessible(true);
-        return (Map<String, Long>) method.invoke(dashboardService, param);
-    }
+    // ... (other test cases and methods)
 }
