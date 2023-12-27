@@ -148,3 +148,81 @@ public class DashBoardProgressTrackerSummaryService {
 	}
 
 }
+======================================
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
+
+@RunWith(MockitoJUnitRunner.class)
+public class DashBoardProgressTrackerSummaryServiceTest {
+
+    @Mock
+    private EmailMessageSearchRepository emailMessageSearchRepository;
+
+    @Mock
+    private DashBoardSummaryHandler dashBoardSummaryHandler;
+
+    @Mock
+    private EmailMessageLabelsRepository emailMessageLabelsRepository;
+
+    @InjectMocks
+    private DashBoardProgressTrackerSummaryService dashboardService;
+
+    @Test
+    public void testGetDashBoardProgressTrackerSummary_Success() throws Exception {
+        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
+                .thenReturn(getMockedAutoProcessedEmails());
+        when(emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek())
+                .thenReturn(getMockedUnProcessedEmails());
+
+        List<ProgressTrackerSummaryResponse> result = dashboardService.getDashBoardProgressTrackerSummary(UUID.randomUUID());
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetDashBoardProgressTrackerSummary_ExceptionHandling() {
+        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
+                .thenThrow(new RuntimeException("Simulated exception"));
+
+        List<ProgressTrackerSummaryResponse> result = dashboardService.getDashBoardProgressTrackerSummary(UUID.randomUUID());
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testSearchDashBoardProgressTrackerSummary_AutoProcessed() {
+        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
+                .thenReturn(getMockedAutoProcessedEmails());
+
+        Map<String, Long> result = Whitebox.invokeMethod(dashboardService, "searchDashBoardProgressTrackerSummary", SearchConstants.AUTOMATICALLY_PROCESSED);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testSearchDashBoardProgressTrackerSummary_UnProcessed() {
+        when(emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek())
+                .thenReturn(getMockedUnProcessedEmails());
+
+        Map<String, Long> result = Whitebox.invokeMethod(dashboardService, "searchDashBoardProgressTrackerSummary", SearchConstants.UNPROCESSED);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    private List<Object[]> getMockedAutoProcessedEmails() {
+        List<Object[]> mockedData = new ArrayList<>();
+        mockedData.add(new Object[]{"2023-12-25", 10L});
+        mockedData.add(new Object[]{"2023-12-26", 15L});
+        return mockedData;
+    }
+
+    private List<Object[]> getMockedUnProcessedEmails() {
+        List<Object[]> mockedData = new ArrayList<>();
+        mockedData.add(new Object[]{"2023-12-25", 5L});
+        mockedData.add(new Object[]{"2023-12-26", 8L});
+        return mockedData;
+    }
+}
