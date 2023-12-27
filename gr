@@ -149,48 +149,70 @@ public class DashBoardProgressTrackerSummaryService {
 
 }
 ======================================
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
 public class DashBoardProgressTrackerSummaryServiceTest {
 
-    // ... (existing mocked fields and annotations)
-
     @Test
-    public void testDayMonthKeysPopulation() throws Exception {
-        Map<String, Long> autoProcessedMap = new HashMap<>();
-        autoProcessedMap.put("2023-12-25", 5L);
+    public void testGetDashBoardProgressTrackerSummary_Success() throws Exception {
+        DashBoardProgressTrackerSummaryService service = new DashBoardProgressTrackerSummaryService();
 
-        Map<String, Long> unProcessedMap = new HashMap<>();
-        unProcessedMap.put("2023-12-26", 8L);
+        EmailMessageSearchRepository searchRepository = mock(EmailMessageSearchRepository.class);
+        service.emailMessageSearchRepository = searchRepository;
 
-        when(emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek())
-                .thenReturn(getMockedAutoProcessedEmails());
-        when(emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek())
-                .thenReturn(getMockedUnProcessedEmails());
+        DashBoardSummaryHandler summaryHandler = mock(DashBoardSummaryHandler.class);
+        service.dashBoardSummaryHandler = summaryHandler;
 
-        List<ProgressTrackerSummaryResponse> result = dashboardService.getDashBoardProgressTrackerSummary(UUID.randomUUID());
+        EmailMessageLabelsRepository labelsRepository = mock(EmailMessageLabelsRepository.class);
+        service.emailMessageLabelsRepository = labelsRepository;
+
+        UUID uuid = UUID.randomUUID();
+        List<Object[]> mockedResponse = Arrays.asList(new Object[]{"2023-12-25", 5L}, new Object[]{"2023-12-26", 8L});
+        when(searchRepository.getAutoProcessedEmailsForPastOneWeek()).thenReturn(mockedResponse);
+        when(searchRepository.getUnProcessedEmailsForPastOneWeek()).thenReturn(mockedResponse);
+
+        List<ProgressTrackerSummaryResponse> result = service.getDashBoardProgressTrackerSummary(uuid);
 
         assertNotNull(result);
         assertEquals(2, result.size());
     }
 
-    // ... (other test cases and methods)
-}
-------
-  private List<Object[]> getMockedAutoProcessedEmails() {
-        // Create mocked data for auto-processed emails
-        List<Object[]> mockedData = new ArrayList<>();
-        mockedData.add(new Object[]{"2023-12-25", 10L});
-        mockedData.add(new Object[]{"2023-12-26", 15L});
-        return mockedData;
+    @Test
+    public void testSearchDashBoardProgressTrackerSummary_AutoProcessed() {
+        DashBoardProgressTrackerSummaryService service = new DashBoardProgressTrackerSummaryService();
+
+        EmailMessageSearchRepository searchRepository = mock(EmailMessageSearchRepository.class);
+        service.emailMessageSearchRepository = searchRepository;
+
+        List<Object[]> mockedResponse = Arrays.asList(new Object[]{"2023-12-25", 5L}, new Object[]{"2023-12-26", 8L});
+        when(searchRepository.getAutoProcessedEmailsForPastOneWeek()).thenReturn(mockedResponse);
+
+        Map<String, Long> result = service.searchDashBoardProgressTrackerSummary(SearchConstants.AUTOMATICALLY_PROCESSED);
+
+        assertEquals(2, result.size());
     }
 
-    private List<Object[]> getMockedUnProcessedEmails() {
-        // Create mocked data for unprocessed emails
-        List<Object[]> mockedData = new ArrayList<>();
-        mockedData.add(new Object[]{"2023-12-25", 5L});
-        mockedData.add(new Object[]{"2023-12-26", 8L});
-        return mockedData;
+    @Test
+    public void testSearchDashBoardProgressTrackerSummary_UnProcessed() {
+        DashBoardProgressTrackerSummaryService service = new DashBoardProgressTrackerSummaryService();
+
+        EmailMessageSearchRepository searchRepository = mock(EmailMessageSearchRepository.class);
+        service.emailMessageSearchRepository = searchRepository;
+
+        List<Object[]> mockedResponse = Arrays.asList(new Object[]{"2023-12-25", 5L}, new Object[]{"2023-12-26", 8L});
+        when(searchRepository.getUnProcessedEmailsForPastOneWeek()).thenReturn(mockedResponse);
+
+        Map<String, Long> result = service.searchDashBoardProgressTrackerSummary(SearchConstants.UNPROCESSED);
+
+        assertEquals(2, result.size());
     }
+
+    // More tests to cover other methods similarly for complete coverage
+}
