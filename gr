@@ -197,3 +197,5 @@ jacocoTestReport {
 }
 
 
+-------------
+implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch', version: springBootVersion
