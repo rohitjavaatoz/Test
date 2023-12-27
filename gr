@@ -1,0 +1,199 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
+apply plugin: 'project-report'
+apply plugin: 'org.sonarqube'
+buildscript {
+	ext {
+		springBootVersion = '2.7.12'
+		springfoxVersion = '2.9.2'
+		artifactory_version = '1.0'
+		junitVersion = '4.13.1'
+		jodaVersion = '2.9.7'
+		javaVersion = '17'
+		tomcatVersion = '9.0.82'
+		SpringSecurityVersion = '5.7.11'
+		springVersion = '5.3.30'
+		nettyVersion = '4.1.101.Final'
+		jacocoVersion = '0.8.10'
+	}
+	repositories {
+	    maven {
+            url "https://oneartifactoryci.verizon.com/artifactory/libs-release-local/"
+        }
+        maven {
+            url "https://oneartifactoryci.verizon.com/artifactory/libs-snapshot/"
+        }
+        maven {
+            url "https://oneartifactoryci.verizon.com/artifactory/remote-repos/"
+        }
+		mavenCentral()  
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2"
+	}
+}
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+tasks.named('jar'){
+	manifest {
+		attributes 'Main-Class': 'com.verizon.cmt-interaction-manager.InteractionManagementApplication'
+	}
+}
+
+group = 'com.verizon.ucm'
+version = '0.0.1-SNAPSHOT'
+description = 'ucm-interaction-management'
+repositories {
+	maven {
+		url "https://oneartifactoryci.verizon.com/artifactory/libs-release-local/"
+	}
+	maven {
+		url "https://oneartifactoryci.verizon.com/artifactory/libs-snapshot/"
+	}
+	maven {
+		url "https://oneartifactoryci.verizon.com/artifactory/remote-repos/"
+	}
+	mavenCentral()  
+}
+
+configurations {
+	compile.exclude module: 'jackson-core-asl'
+	compile.exclude group: 'org.codehaus.jackson'
+	compile.exclude module: 'jackson-mapper-asl'
+	compile.exclude group: 'org.codehaus.jackson'
+	compile.exclude module: 'log4j-api'
+//	compile.exclude group: 'security-core'
+	compile.exclude module: 'json-smart'
+	compile.exclude module: 'json-path'
+}
+
+dependencies {
+	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+	implementation('org.springframework.boot:spring-boot-starter-webflux')
+	implementation(group: 'org.springframework.boot', name:'spring-boot-starter-data-redis', version: springBootVersion ){
+		exclude group: 'io.lettuce', module: 'lettuce-core'
+	}
+	implementation('org.springframework.boot:spring-boot-starter-web')
+	implementation (group: 'org.springframework.boot', name:'spring-boot-starter-test', version: springBootVersion){
+		exclude group: 'junit', module: 'junit'
+		exclude group: 'org.springframework', module: 'spring-test'
+	}
+	implementation (group: 'org.postgresql', name:'postgresql', version: '2.2.13.RELEASE'){
+		version {
+			strictly '42.5.1'
+		}
+	}
+
+	implementation group: 'org.springframework.security', name: 'spring-security-core', version: SpringSecurityVersion
+	implementation group: 'org.springframework.security', name: 'spring-security-config', version: SpringSecurityVersion
+	implementation group: 'org.springframework.security', name: 'spring-security-web', version: SpringSecurityVersion
+	implementation group: 'org.springframework.security', name: 'spring-security-crypto', version: SpringSecurityVersion
+	implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '1.0.0'
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation group: 'io.springfox', name: 'springfox-swagger2', version: springfoxVersion
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: springfoxVersion
+	implementation 'net.javacrumbs.shedlock:shedlock-spring:4.20.1'
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.20.1'
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:4.35.0'
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-jedis:4.35.0'
+	implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1'
+	implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '6.6'
+	runtimeOnly('org.springframework.boot:spring-boot-devtools')
+	runtimeOnly('org.postgresql:postgresql')
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch', version: springBootVersion
+	implementation group: 'KirkeWhiteListHtml', name: 'KirkeWhiteListHtml', version: '1.0.2.2'
+	implementation 'com.sun.mail:javax.mail:1.5.1'
+	implementation group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.5.2.RELEASE'
+	implementation group: 'com.mikesamuel', name: 'json-sanitizer', version: '1.2.2'
+	implementation group: 'org.hibernate', name: 'hibernate-core', version: '5.6.10.Final'
+	implementation group: 'org.hibernate', name: 'hibernate-c3p0', version: '5.4.24.Final'
+	implementation group: 'org.yaml', name: 'snakeyaml', version: '2.0' 
+	compileOnly group: 'javax.servlet', name: 'servlet-api', version: '2.5'
+	implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatVersion
+	implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: tomcatVersion
+	implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatVersion
+	implementation group: 'org.apache.tomcat', name: 'tomcat-annotations-api', version: tomcatVersion
+	implementation group: 'com.google.guava', name: 'guava', version: '32.0.1-jre'
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.2'
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.2'
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.4.2'
+	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.13.2'
+	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.13.2'
+	implementation group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.1.7.Final'
+	implementation group: 'io.netty', name: 'netty-buffer', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-codec', version: nettyVersion
+	implementation group: 'io.netty', name: 'netty-codec-dns', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-codec-http', version: nettyVersion
+	implementation group: 'io.netty', name: 'netty-codec-http2', version: nettyVersion
+	implementation group: 'io.netty', name: 'netty-codec-socks', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-common', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-handler', version: nettyVersion
+	implementation group: 'io.netty', name: 'netty-handler-proxy', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-resolver', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-resolver-dns', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-transport', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: nettyVersion
+    implementation group: 'io.netty', name: 'netty-transport-native-unix-common', version: nettyVersion
+	implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.17.1'
+	implementation group: 'org.springframework', name: 'spring-core', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-context-support', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-context', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-tx', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-aspects', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-beans', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-aop', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-orm', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-jdbc', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-expression', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-web', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-webflux', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-oxm', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-jcl', version: springVersion
+	implementation group: 'org.springframework', name: 'spring-webmvc', version: springVersion
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+	implementation 'no.finn.unleash:unleash-client-java:4.4.1'
+	testImplementation group: 'org.springframework', name: 'spring-test', version: springVersion
+	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+	testImplementation('io.projectreactor:reactor-test')
+	testImplementation group: 'junit', name: 'junit', version:junitVersion
+	implementation group: 'org.springframework', name:'spring-test', version: springVersion
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.10.0'
+	implementation group: 'org.codehaus.jettison', name: 'jettison', version: '1.5.4'
+	implementation group: 'io.projectreactor.netty', name: 'reactor-netty-core', version: '1.0.24'
+    implementation group: 'io.projectreactor.netty', name: 'reactor-netty-http', version: '1.0.24'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+}
+
+sonarqube {
+	properties {
+		property 'sonar.exclusions', "**/config/*.java", "**/constants/*.java", "**/dto/*.java", "**/hierarchy/*.java", "**/exception/*.java", "**/model/*.java", "**/threshold/*.java", "**/userdefinedconflict/*.java", "**/services/ScheduledService.java", "**/services/MailReceiverService.java", "**/projection/*.java", "**/repository/*.java"
+	}
+}
+
+jacoco {
+	toolVersion = jacocoVersion
+	reportsDirectory = layout.buildDirectory.dir('reports/jacoco')
+}
+
+tasks.withType(Test) {
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = true
+	}
+}
+
+
