@@ -178,3 +178,19 @@ public class DashBoardProgressTrackerSummaryServiceTest {
 
     // ... (other test cases and methods)
 }
+------
+  private List<Object[]> getMockedAutoProcessedEmails() {
+        // Create mocked data for auto-processed emails
+        List<Object[]> mockedData = new ArrayList<>();
+        mockedData.add(new Object[]{"2023-12-25", 10L});
+        mockedData.add(new Object[]{"2023-12-26", 15L});
+        return mockedData;
+    }
+
+    private List<Object[]> getMockedUnProcessedEmails() {
+        // Create mocked data for unprocessed emails
+        List<Object[]> mockedData = new ArrayList<>();
+        mockedData.add(new Object[]{"2023-12-25", 5L});
+        mockedData.add(new Object[]{"2023-12-26", 8L});
+        return mockedData;
+    }
