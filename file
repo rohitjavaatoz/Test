@@ -1,0 +1,150 @@
+package com.verizon.ucm.interactionmanagement.services.search.emailmessages;
+
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+import com.verizon.ucm.interactionmanagement.response.dashboard.ProgressTrackerSummaryResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.verizon.ucm.interactionmanagement.entity.MessagesEntity;
+import com.verizon.ucm.interactionmanagement.handler.DashBoardSummaryHandler;
+import com.verizon.ucm.interactionmanagement.repository.EmailMessageLabelsRepository;
+import com.verizon.ucm.interactionmanagement.repository.EmailMessageSearchRepository;
+import com.verizon.ucm.interactionmanagement.specifications.EmailMessageFilterCriteria;
+import com.verizon.ucm.interactionmanagement.specifications.EmailMessageSearchCriteria;
+import com.verizon.ucm.interactionmanagement.util.DateTimeConversionUtil;
+import com.verizon.ucm.interactionmanagement.util.SearchConstants;
+
+@Service
+public class DashBoardProgressTrackerSummaryService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DashBoardProgressTrackerSummaryService.class);
+
+	@Autowired
+	private EmailMessageSearchRepository emailMessageSearchRepository;
+
+	@Autowired
+	private DashBoardSummaryHandler dashBoardSummaryHandler;
+	
+	@Autowired
+	private EmailMessageLabelsRepository emailMessageLabelsRepository;
+
+	public List<ProgressTrackerSummaryResponse> getDashBoardProgressTrackerSummary(UUID uuid) {
+
+		LOGGER.info(
+				"DashBoardProgressTrackerSummaryService# getDashBoardProgressTrackerSummary#: inside getDashBoardProgressTrackerSummary: uuid={}",
+				uuid);
+		List<ProgressTrackerSummaryResponse> progressTrackerMap = null;
+
+		try {
+			Instant startTime = Instant.now();
+			CompletableFuture<Map<String, Long>> autoProcessedFuture = CompletableFuture
+					.supplyAsync(() -> searchDashBoardProgressTrackerSummary(SearchConstants.AUTOMATICALLY_PROCESSED));
+			
+			CompletableFuture<Map<String, Long>> unProcessedMapFuture = CompletableFuture
+					.supplyAsync(() ->  searchDashBoardProgressTrackerSummary(SearchConstants.UNPROCESSED));
+			
+			CompletableFuture<Void> combinedProgressTrackerFuture = CompletableFuture
+					.allOf(autoProcessedFuture, unProcessedMapFuture);
+			
+			combinedProgressTrackerFuture.get();
+
+			Map<String, Long> autoProcessedMap = null;
+			if (autoProcessedFuture.isDone()) {
+				autoProcessedMap = autoProcessedFuture.get();
+			}
+
+			Map<String, Long> unProcessedMap = null;
+			if (unProcessedMapFuture.isDone()) {
+				unProcessedMap = unProcessedMapFuture.get();
+			}
+
+			Set<String> dayMonthKeys = null;
+			if ((autoProcessedMap != null && !autoProcessedMap.isEmpty())
+					|| (unProcessedMap != null && !unProcessedMap.isEmpty())) {
+				dayMonthKeys = new TreeSet<>();
+				dayMonthKeys.addAll(autoProcessedMap != null ? autoProcessedMap.keySet() : null);
+				dayMonthKeys.addAll(unProcessedMap != null ? unProcessedMap.keySet() : null);
+			}
+
+			if (dayMonthKeys != null && !dayMonthKeys.isEmpty()) {
+				progressTrackerMap = prepareProgressTrackerResponse(dayMonthKeys, autoProcessedMap, unProcessedMap);
+			}
+			
+			LOGGER.info("DashBoardSummaryService# getDashBoardSummary#:end:successfully prepared ProgressTracker dashboard summary for uuid={}, time_taken={}",
+					uuid, Duration.between(startTime, Instant.now()).toMillis());
+
+		} catch (InterruptedException ie) {
+			LOGGER.error("DashBoardProgressTrackerSummaryService# getDashBoardProgressTrackerSummary#: Exception occurred {},uuid:{}",
+					ie, uuid);
+			Thread.currentThread().interrupt();
+		} catch (Exception e) {
+			LOGGER.error("DashBoardProgressTrackerSummaryService# getDashBoardProgressTrackerSummary#: Exception occurred while building ProgressTrackerResponse object: uuid={}, exception={}",
+					uuid, e.getMessage());
+		}
+
+		return progressTrackerMap;
+	}
+	
+	private Map<String, Long> searchDashBoardProgressTrackerSummary(String dashBoardStatusSearch) {
+
+		List<Object[]> emailListCount=new ArrayList<Object[]>();
+
+		if (SearchConstants.AUTOMATICALLY_PROCESSED.equalsIgnoreCase(dashBoardStatusSearch)) {
+			emailListCount= emailMessageSearchRepository.getAutoProcessedEmailsForPastOneWeek();
+
+		} else if (SearchConstants.UNPROCESSED.equalsIgnoreCase(dashBoardStatusSearch)) {
+			emailListCount= emailMessageSearchRepository.getUnProcessedEmailsForPastOneWeek();
+		}
+
+		Instant startTime = Instant.now();
+		LOGGER.info(
+				"DashBoardSummaryService# getDashBoardSummary#:end:successfully prepared ProgressTracker-XXXXXXXXXXXXXXXXXXXXX dashboard summary for time_taken={}",
+				Duration.between(startTime, Instant.now()).toMillis());
+		return createProgressTrackerMap(emailListCount);
+	}
+
+	private Map<String, Long> createProgressTrackerMap(List<Object[]> searchResponse) {
+
+		Map<String, Long> map = new HashMap<>();
+		if (searchResponse != null && !searchResponse.isEmpty()) {
+			for (Object[] obj:searchResponse ) {
+				String dayMonth = obj[0].toString();
+				map.put(dayMonth, Long.valueOf(obj[1].toString()));
+			}
+		}
+		return map;
+	}
+	
+	private List<ProgressTrackerSummaryResponse> prepareProgressTrackerResponse(Set<String> keys,
+			Map<String, Long> autoProcessedMap, Map<String, Long> unProcessedMap) {
+		List<ProgressTrackerSummaryResponse> progressTrackerSummaryResponseList=new ArrayList<>();
+
+		Map<String, Map<String, Long>> map = new LinkedHashMap<>();
+		for (String key : keys) {
+			if (key != null && !map.containsKey(key)) {
+				ProgressTrackerSummaryResponse progressTrackerSummaryResponse=new ProgressTrackerSummaryResponse();
+				progressTrackerSummaryResponse.setxValue(key);
+				progressTrackerSummaryResponse.setAutomaticallyProcessed(autoProcessedMap.get(key) != null ? autoProcessedMap.get(key) : 0L );
+				progressTrackerSummaryResponse.setUnProcessed(unProcessedMap.get(key) != null ? unProcessedMap.get(key) : 0L);
+				progressTrackerSummaryResponseList.add(progressTrackerSummaryResponse);
+			}
+		}
+		return progressTrackerSummaryResponseList;
+	}
+
+}
