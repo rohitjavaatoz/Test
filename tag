@@ -8,3 +8,12 @@ dependencies {
 
 
 Cannot resolve constructor 'MimeMessageHelper(MimeMessage, boolean)'
+-------
+dependencies {
+    implementation 'jakarta.mail:jakarta.mail-api:1.7.5' // Replace version with appropriate one
+    // other dependencies...
+}
+import javax.mail.internet.MimeMessage;
+import javax.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
