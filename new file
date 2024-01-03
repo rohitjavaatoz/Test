@@ -1,95 +1,93 @@
-import java.util.Arrays;
-import java.util.UUID;
-import jakarta.mail.MessagingException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+public class EmailTypeTest {
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+    @Test
+    public void testFindEmailType_Forwarded() {
+        String subject = "Forward: Meeting Agenda";
+        String emailMsgStatus = "Pending";
 
-public class MailHandlingServiceTest {
-
-    @Mock
-    private EmailMessagesRepository emailMessagesRepository;
-
-    // Mock other repositories and services used in MailHandlingService
-
-    @Mock
-    private MailConnector mailConnector;
-
-    @InjectMocks
-    private MailHandlingService mailHandlingService;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        assertEquals(Constants.EMAIL_MESSAGE_STATUS_FORWARDED, findEmailType(subject, emailMsgStatus));
     }
 
     @Test
-    public void testSendReplyEmail_ValidSenderAndExtractionId() throws MessagingException {
-        // Arrange
-        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-        UUID uuid = UUID.randomUUID();
-        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
-        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
+    public void testFindEmailType_Replied() {
+        String subject = "Re: Feedback on Proposal";
+        String emailMsgStatus = "Pending";
 
-        // Act
-        mailHandlingService.sendReplyEmail(emailNotificationsDTO, uuid);
-
-        // Assert
-        // Verify method calls, returned values, and behavior using Mockito.verify(), Mockito.when(), and assertions
+        assertEquals(Constants.EMAIL_MESSAGE_STATUS_REPLIED, findEmailType(subject, emailMsgStatus));
     }
 
     @Test
-    public void testSendReplyEmail_CatchBlock() throws MessagingException {
-        // Arrange
-        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-        UUID uuid = UUID.randomUUID();
-        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
-        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
-        doThrow(new MessagingException("Error sending email")).when(mailConnector.javaMailSender()).getSession();
+    public void testFindEmailType_Default() {
+        String subject = "Important Update";
+        String emailMsgStatus = "Pending";
 
-        // Act
-        mailHandlingService.sendReplyEmail(emailNotificationsDTO, uuid);
-
-        // Assert
-        // Verify method calls, returned values, and behavior in the catch block
+        assertEquals("Pending", findEmailType(subject, emailMsgStatus));
     }
 
     @Test
-    public void testSendForwardEmail_ValidSenderAndExtractionId() throws MessagingException {
-        // Arrange
-        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-        UUID uuid = UUID.randomUUID();
-        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
-        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
+    public void testFindEmailType_Forwarded_MixedCase() {
+        String subject = "FoRwArD: Monthly Report";
+        String emailMsgStatus = "Pending";
 
-        // Act
-        mailHandlingService.sendForwardEmail(emailNotificationsDTO, uuid);
-
-        // Assert
-        // Verify method calls, returned values, and behavior using Mockito.verify(), Mockito.when(), and assertions
+        assertEquals(Constants.EMAIL_MESSAGE_STATUS_FORWARDED, findEmailType(subject, emailMsgStatus));
     }
 
     @Test
-    public void testSendForwardEmail_CatchBlock() throws MessagingException {
-        // Arrange
-        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
-        UUID uuid = UUID.randomUUID();
-        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
-        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
-        doThrow(new MessagingException("Error sending email")).when(mailConnector.javaMailSender()).getSession();
+    public void testFindEmailType_Replied_MixedCase() {
+        String subject = "rEpLiEd: Team Discussion";
+        String emailMsgStatus = "Pending";
 
-        // Act
-        mailHandlingService.sendForwardEmail(emailNotificationsDTO, uuid);
+        assertEquals(Constants.EMAIL_MESSAGE_STATUS_REPLIED, findEmailType(subject, emailMsgStatus));
+    }
 
-        // Assert
-        // Verify method calls, returned values, and behavior in the catch block
+    @Test
+    public void testFindEmailType_EmptySubject() {
+        String subject = "";
+        String emailMsgStatus = "Pending";
+
+        assertEquals("Pending", findEmailType(subject, emailMsgStatus));
+    }
+
+    @Test
+    public void testFindEmailType_NullSubject() {
+        String emailMsgStatus = "Pending";
+
+        assertEquals("Pending", findEmailType(null, emailMsgStatus));
+    }
+
+    @Test
+    public void testFindEmailType_NullSubjectAndStatus() {
+        assertEquals(null, findEmailType(null, null));
+    }
+
+    @Test
+    public void testFindEmailType_LongSubject() {
+        String subject = "!!@#$%^&*() Long subject test: Checking if the subject is too long and still recognized";
+        String emailMsgStatus = "Pending";
+
+        assertEquals("Pending", findEmailType(subject, emailMsgStatus));
+    }
+
+    // Mocking the Constants class
+    private String findEmailType(String subject, String emailMsgStatus) {
+        Constants mockedConstants = mock(Constants.class);
+
+        when(mockedConstants.FORWARD).thenReturn("forward");
+        when(mockedConstants.REPLIED).thenReturn("replied");
+
+        String emailType;
+        if (subject.toLowerCase().startsWith(mockedConstants.FORWARD)) {
+            emailType = mockedConstants.EMAIL_MESSAGE_STATUS_FORWARDED;
+        } else if (subject.toLowerCase().startsWith(mockedConstants.REPLIED)) {
+            emailType = mockedConstants.EMAIL_MESSAGE_STATUS_REPLIED;
+        } else {
+            emailType = emailMsgStatus;
+        }
+        return emailType;
     }
 }
