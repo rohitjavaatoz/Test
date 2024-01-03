@@ -1,93 +1,49 @@
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+19:45:36.165 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- sendForwardEmail: Started sending the Email Reply, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.166 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- sendForwardEmail: Session was created : jakarta.mail.Session@7459a21e, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.167 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logEmail: new message record added to the Database: Messages{messagesId=1, messagesTypeId=1, messagesStatusId=null, sender='null', recipient='null', dateSent=null, dateReceived=null, direction='null', createdDate=2024-01-03T19:45:36.163564500, createdBy='null', modifiedDate=null, modifiedBy='null'}, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.168 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logEmail: MessageRecipient Created in the Database: MessageRecipient{recipientCCId=1, messagesId=1, emailDomain='recipient@gmail.com'}, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.169 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logEmail: Message Record added into the messageProcessingHistory Database: null, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.169 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logReplyEmail: CC Recipient added: cc@email.com, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.169 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logEmail: new email message record added to the Database: EmailMessages{emailMessageId=1, messageId=null, headerId='null', subject='null', bodyHtml='null', bodyText='null', bodyTranslated='null', language='null', partyId=null, isSeen=false, emailMessageStatusId=null, isLocked=false, lockedBy='null', lockedAt=null, createdDate=null, createdBy='null', modifiedDate=null, modifiedBy='null', parentEmailMessageId=null, emailAttachments=[]}, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.171 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logOutboundAttachment: Stored attachments in Database, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.172 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logEmail: EMail Message Record added into the EmailMessageProcessingHistory Database: null, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
+19:45:36.172 [main] INFO com.verizon.ucm.interactionmanagement.services.MailHandlingService -- logEmail: EmailExtractionMapping Created: null, uuid=1ffb2e24-deb0-45d3-be14-3cd211d85558
 
-public class EmailTypeTest {
+java.lang.NoClassDefFoundError: com/sun/mail/util/FolderClosedIOException
 
-    @Test
-    public void testFindEmailType_Forwarded() {
-        String subject = "Forward: Meeting Agenda";
-        String emailMsgStatus = "Pending";
+	at com.verizon.ucm.interactionmanagement.services.MailHandlingService.sendForwardEmail(MailHandlingService.java:1165)
+	at com.verizon.ucm.interactionmanagement.services.MailHandlingServiceTest.sendForwardEmail(MailHandlingServiceTest.java:779)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
+	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:235)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:54)
+Caused by: java.lang.ClassNotFoundException: com.sun.mail.util.FolderClosedIOException
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
+	... 30 more
 
-        assertEquals(Constants.EMAIL_MESSAGE_STATUS_FORWARDED, findEmailType(subject, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_Replied() {
-        String subject = "Re: Feedback on Proposal";
-        String emailMsgStatus = "Pending";
-
-        assertEquals(Constants.EMAIL_MESSAGE_STATUS_REPLIED, findEmailType(subject, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_Default() {
-        String subject = "Important Update";
-        String emailMsgStatus = "Pending";
-
-        assertEquals("Pending", findEmailType(subject, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_Forwarded_MixedCase() {
-        String subject = "FoRwArD: Monthly Report";
-        String emailMsgStatus = "Pending";
-
-        assertEquals(Constants.EMAIL_MESSAGE_STATUS_FORWARDED, findEmailType(subject, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_Replied_MixedCase() {
-        String subject = "rEpLiEd: Team Discussion";
-        String emailMsgStatus = "Pending";
-
-        assertEquals(Constants.EMAIL_MESSAGE_STATUS_REPLIED, findEmailType(subject, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_EmptySubject() {
-        String subject = "";
-        String emailMsgStatus = "Pending";
-
-        assertEquals("Pending", findEmailType(subject, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_NullSubject() {
-        String emailMsgStatus = "Pending";
-
-        assertEquals("Pending", findEmailType(null, emailMsgStatus));
-    }
-
-    @Test
-    public void testFindEmailType_NullSubjectAndStatus() {
-        assertEquals(null, findEmailType(null, null));
-    }
-
-    @Test
-    public void testFindEmailType_LongSubject() {
-        String subject = "!!@#$%^&*() Long subject test: Checking if the subject is too long and still recognized";
-        String emailMsgStatus = "Pending";
-
-        assertEquals("Pending", findEmailType(subject, emailMsgStatus));
-    }
-
-    // Mocking the Constants class
-    private String findEmailType(String subject, String emailMsgStatus) {
-        Constants mockedConstants = mock(Constants.class);
-
-        when(mockedConstants.FORWARD).thenReturn("forward");
-        when(mockedConstants.REPLIED).thenReturn("replied");
-
-        String emailType;
-        if (subject.toLowerCase().startsWith(mockedConstants.FORWARD)) {
-            emailType = mockedConstants.EMAIL_MESSAGE_STATUS_FORWARDED;
-        } else if (subject.toLowerCase().startsWith(mockedConstants.REPLIED)) {
-            emailType = mockedConstants.EMAIL_MESSAGE_STATUS_REPLIED;
-        } else {
-            emailType = emailMsgStatus;
-        }
-        return emailType;
-    }
-}
