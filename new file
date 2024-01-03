@@ -1,0 +1,91 @@
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import jakarta.mail.MessagingException;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+public class MailHandlingServiceTest {
+
+    @Mock
+    private EmailMessagesRepository emailMessagesRepository;
+
+    // Mock other repositories and services used in MailHandlingService
+
+    @Mock
+    private MailConnector mailConnector;
+
+    @InjectMocks
+    private MailHandlingService mailHandlingService;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testSendReplyEmail_ValidSenderAndExtractionId() throws MessagingException {
+        // Arrange
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        UUID uuid = UUID.randomUUID();
+        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
+        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
+
+        // Act
+        mailHandlingService.sendReplyEmail(emailNotificationsDTO, uuid);
+
+        // Assert
+        // Verify method calls, returned values, and behavior using Mockito.verify(), Mockito.when(), and assertions
+    }
+
+    @Test
+    public void testSendReplyEmail_CatchBlock() throws MessagingException {
+        // Arrange
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        UUID uuid = UUID.randomUUID();
+        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
+        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
+        doThrow(new MessagingException("Error sending email")).when(mailConnector.javaMailSender()).getSession();
+
+        // Act
+        mailHandlingService.sendReplyEmail(emailNotificationsDTO, uuid);
+
+        // Assert
+        // Verify method calls, returned values, and behavior in the catch block
+    }
+
+    @Test
+    public void testSendForwardEmail_ValidSenderAndExtractionId() throws MessagingException {
+        // Arrange
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        UUID uuid = UUID.randomUUID();
+        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
+        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
+
+        // Act
+        mailHandlingService.sendForwardEmail(emailNotificationsDTO, uuid);
+
+        // Assert
+        // Verify method calls, returned values, and behavior using Mockito.verify(), Mockito.when(), and assertions
+    }
+
+    @Test
+    public void testSendForwardEmail_CatchBlock() throws MessagingException {
+        // Arrange
+        EmailNotificationsDTO emailNotificationsDTO = new EmailNotificationsDTO();
+        UUID uuid = UUID.randomUUID();
+        when(emailMessagesRepository.getAllMailMessagesByExtractionId(any())).thenReturn(Arrays.asList(new Object[]{"from", "to", "sentDate", "subject"}));
+        when(mailConnector.javaMailSender()).thenReturn(mock(JavaMailSender.class));
+        doThrow(new MessagingException("Error sending email")).when(mailConnector.javaMailSender()).getSession();
+
+        // Act
+        mailHandlingService.sendForwardEmail(emailNotificationsDTO, uuid);
+
+        // Assert
+        // Verify method calls, returned values, and behavior in the catch block
+    }
+}
