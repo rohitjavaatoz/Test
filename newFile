@@ -85,13 +85,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobLauncher;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TranslateEmailJobTest {
+
+    @Mock
+    private JobLauncher jobLauncher;
+
+    @Mock
+    private JobRepository jobRepository;
 
     @Mock
     private LanguageTranslationServiceV2 languageTranslationServiceV2;
@@ -99,27 +110,47 @@ public class TranslateEmailJobTest {
     @Mock
     private LanguageTranslationService languageTranslationService;
 
+    @Mock
+    private PlatformTransactionManager masterTransactionManager;
+
+    @Mock
+    private PlatformTransactionManager platformTransactionManager;
+
     @InjectMocks
     private TranslateEmailJob translateEmailJob;
 
     @Test
-    public void testTranslateTask() {
-        // Mock setup
-        when(languageTranslationServiceV2.someMethod()).thenReturn("mockedResult");
-        when(languageTranslationService.someMethod()).thenReturn("mockedResult");
+    public void testTranslateLoggedEmailsScheduledJob() throws Exception {
+        // Mocking isOldBackUpFlowEnabled value
+        when(translateEmailJob.isOldBackUpFlowEnabled).thenReturn(true); // or any other relevant value
+
+        // Mocking job execution
+        JobExecution jobExecution = mock(JobExecution.class);
+        when(jobLauncher.run(any(Job.class), any(JobParameters.class))).thenReturn(jobExecution);
 
         // Call the method to test
-        LanguageTranslationTask task = translateEmailJob.translateTask(languageTranslationServiceV2, languageTranslationService);
+        translateEmailJob.translateLoggedEmailsScheduledJob();
 
-        // Assertions or verifications based on the task creation
-        assertNotNull(task);
-        assertEquals("mockedResult", task.getSomeValue()); // Example assertion based on task behavior
+        // Verify jobLauncher.run() method is called with the correct parameters
+        verify(jobLauncher, times(1)).run(any(Job.class), any(JobParameters.class));
 
-        // Verify interactions or behavior with mocks if required
-        verify(languageTranslationServiceV2, times(1)).someMethod();
-        verify(languageTranslationService, times(1)).someMethod();
+        // Verify other relevant behaviors or assertions based on the jobExecution
+    }
+
+    @Test
+    public void testRunTranslateEvent() {
+        // Implement test logic for runTranslateEvent method
+    }
+
+    @Test
+    public void testStep1() {
+        // Implement test logic for step1 method
+    }
+
+    @Test
+    public void testTranslateTask() {
+        // Implement test logic for translateTask method
     }
 
     // Add more test cases for other methods in the TranslateEmailJob class
 }
-
