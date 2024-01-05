@@ -205,3 +205,59 @@ public class ExternalParsingEngineImpl implements ExternalServiceIfc {
 }
 
 
+--------------
+import com.verizon.ucm.interactionmanagement.dto.UserInfoDTO;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+
+public class ExternalParsingEngineImplTest {
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @InjectMocks
+    private ExternalParsingEngineImpl externalParsingEngine;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetUserInfoDetail_Success() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        UserInfoDTO expectedUserInfo = new UserInfoDTO();
+
+        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(UserInfoDTO.class)))
+                .thenReturn(ResponseEntity.ok(expectedUserInfo));
+
+        UserInfoDTO actualUserInfo = externalParsingEngine.getUserInfoDetail("sampleVzId", uuid);
+
+        assertEquals(expectedUserInfo, actualUserInfo);
+    }
+
+    @Test
+    public void testGetUserInfoDetail_Failure() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.eq(HttpMethod.GET), Mockito.any(), Mockito.eq(UserInfoDTO.class)))
+                .thenReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+
+        UserInfoDTO actualUserInfo = externalParsingEngine.getUserInfoDetail("sampleVzId", uuid);
+
+        assertEquals(null, actualUserInfo);
+    }
+    // Add more test cases to cover different scenarios
+}
