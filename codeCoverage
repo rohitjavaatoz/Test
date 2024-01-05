@@ -1,0 +1,207 @@
+package com.verizon.ucm.interactionmanagement.services.external;
+
+import com.verizon.ucm.interactionmanagement.config.AppProperties;
+import com.verizon.ucm.interactionmanagement.constants.Constants;
+import com.verizon.ucm.interactionmanagement.dto.AttachmentParsingDTO;
+import com.verizon.ucm.interactionmanagement.dto.ParsingResponseDTO;
+import com.verizon.ucm.interactionmanagement.dto.UserInfoDTO;
+import com.verizon.ucm.interactionmanagement.model.EmailMessages;
+import com.verizon.ucm.interactionmanagement.model.ReferenceResponseObject;
+import com.verizon.ucm.interactionmanagement.services.JWTTokenService;
+import com.verizon.ucm.interactionmanagement.util.CleanPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.UUID;
+@Service
+public class ExternalParsingEngineImpl implements ExternalServiceIfc {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExternalParsingEngineImpl.class);
+    @Autowired
+    AppProperties appProperties;
+    @Autowired
+    RestTemplate restTemplate;
+    @Autowired
+    JWTTokenService jwtTokenService;
+
+    public ParsingResponseDTO fetchEntitiesFromEmailMessage(EmailMessages emailMessage, UUID uuid) throws Exception {
+        LOGGER.info("fetchEntitiesFromEmailMessage:: sending email_message for entity retrieval EmailMessages={}, uuid={}", emailMessage, uuid);
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        String jwtToken = CleanPath.cleanString(jwtTokenService.getJwtToken(Constants.AUTO_SUBMITTER));
+        headers.setBearerAuth(jwtToken);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("uuid", uuid.toString());
+        //http entity for rest template
+        HttpEntity<EmailMessages> entity = new HttpEntity<>(emailMessage, headers);
+        //response entity to be returned
+        ResponseEntity<ParsingResponseDTO> response = null;
+        //actual call to python rest endpoint
+        try {
+            LOGGER.info("fetchEntitiesFromEmailMessage:: before calling url={} to parse email_message={}, uuid={}", appProperties.getParseEmail(), emailMessage, uuid);
+            response = restTemplate.exchange(appProperties.getParseEmail(), HttpMethod.POST, entity, ParsingResponseDTO.class);
+            Instant end = Instant.now();
+            LOGGER.info("fetchEntitiesFromEmailMessage:: after call occurred to url={}, parsing_response_object={}, response_code={}, time_taken={}, uuid={}", appProperties.getParseEmail(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                LOGGER.info("parseEmail: entity retrieval response ParsingResponseDTO={}, uuid={}", response.getBody(), uuid);
+                return response.getBody();
+            }
+            throw new Exception("fetchEntitiesFromEmailMessage:: unable to parsing email for email_message_id= "
+                    + emailMessage.getEmailMessageId() + ",uuid=" + uuid);
+        } catch (Exception e) {
+            LOGGER.error("fetchEntitiesFromEmailMessage:: Exception occurred during parsing whole email {} {}, uuid={}", e.getStackTrace(), e.getMessage(), uuid);
+            throw new Exception("EmailMessageParsingService# parseEmail#: Exception occurred during parsing whole for email_message_id= "
+                    + emailMessage.getEmailMessageId() + ",uuid=" + uuid, e);
+        }
+    }
+
+    public ParsingResponseDTO fetchEntitiesFromEmailAttachment(AttachmentParsingDTO attachmentParsingDTO, UUID uuid) throws Exception {
+        LOGGER.info("fetchEntitiesFromEmailAttachment: sending attachment_dto for entity retrieval attachment_id={}, email_message_id={}, uuid={}", attachmentParsingDTO.getEmailAttachmentId(), attachmentParsingDTO.getEmailMessageId(), uuid);
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        String jwtToken = CleanPath.cleanString(jwtTokenService.getJwtToken(Constants.AUTO_SUBMITTER));
+        headers.setBearerAuth(jwtToken);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("uuid", uuid.toString());
+        //http entity for rest template
+        HttpEntity<AttachmentParsingDTO> entity = new HttpEntity<>(attachmentParsingDTO, headers);
+        //response entity to be returned
+        ResponseEntity<ParsingResponseDTO> response = null;
+        //actual call to python rest endpoint
+        try {
+            LOGGER.info("fetchEntitiesFromEmailAttachment: before calling url={} to parse email_attachement={}, uuid={}", appProperties.getParseAttachment(), attachmentParsingDTO.getEmailAttachmentId(), uuid);
+            response = restTemplate.exchange(appProperties.getParseAttachment(), HttpMethod.POST, entity, ParsingResponseDTO.class);
+            Instant end = Instant.now();
+            LOGGER.info("fetchEntitiesFromEmailAttachment: after call occurred to url={}, parsing_response_object={}, response_code={}, time_taken={}, uuid={}", appProperties.getParseAttachment(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                LOGGER.info("fetchEntitiesFromEmailAttachment: entity retrieval response ParsingResponseDTO={}, uuid={}", response.getBody(), uuid);
+                return response.getBody();
+            }
+            throw new Exception("unable to parse attchment for email_message_id=" + attachmentParsingDTO.getEmailMessageId() + "uuid=" + uuid);
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred during parsing whole attachment {} {}, uuid={}", e.getStackTrace(), e.getMessage(), uuid);
+            throw new Exception("Exception occurred during parsing whole attachment for email_message_id= "
+                    + attachmentParsingDTO.getEmailMessageId() + ",uuid=" + uuid, e);
+        }
+    }
+
+    public ReferenceResponseObject fetchReferenceFromEmailMessage(EmailMessages emailMessage, UUID uuid) throws Exception {
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        String jwtToken = CleanPath.cleanString(jwtTokenService.getJwtToken(Constants.AUTO_SUBMITTER));
+        headers.setBearerAuth(jwtToken);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("uuid", uuid.toString());
+        //http entity for rest template
+        HttpEntity<EmailMessages> entity = new HttpEntity<>(emailMessage, headers);
+        //response entity to be returned
+        ResponseEntity<ReferenceResponseObject> response = null;
+        //actual call to python rest endpoint
+        try {
+            LOGGER.info("fetchReferenceFromEmailMessage:: before calling url={} to fetch reference number for email_message={}, uuid={}", appProperties.getFetchReferenceNumber(), emailMessage, uuid);
+            response = restTemplate.exchange(appProperties.getFetchReferenceNumber(), HttpMethod.POST, entity, ReferenceResponseObject.class);
+            Instant end = Instant.now();
+            LOGGER.info("fetchReferenceFromEmailMessage:: after call occurred to url={}, reference_response_body={}, response_code={}, time_taken={}, uuid={}", appProperties.getFetchReferenceNumber(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                return response.getBody();
+            } else if (response.getStatusCode().value() == 204) {
+                return null;
+            }
+            //todo update to new fallout status for reference having 4XX or 5XX status code
+            throw new Exception("unable to fetch reference number for email_message_id=" + emailMessage.getEmailMessageId() + "uuid=" + uuid);
+        } catch (Exception e) {
+            LOGGER.error("fetchReferenceFromEmailMessage:: exception occurred while trying to fetch reference number. Exception={},{}, uuid={}", e.getStackTrace(), e.getMessage(), uuid);
+            throw new Exception("fetchReferenceFromEmailMessage:: exception occurred while trying to fetch reference number for email_message_id= "
+                    + emailMessage.getEmailMessageId() + ",uuid=" + uuid, e);
+        }
+    }
+
+    public String translateEmailBody(EmailMessages emailMessage, UUID uuid) throws Exception {
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        String jwtToken = CleanPath.cleanString(jwtTokenService.getJwtToken(Constants.AUTO_SUBMITTER));
+        headers.setBearerAuth(jwtToken);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("uuid", uuid.toString());
+        //http entity for rest template
+        HttpEntity<EmailMessages> entity = new HttpEntity<>(emailMessage, headers);
+        //response entity to be returned
+        ResponseEntity<EmailMessages> response = null;
+        //actual call to python rest endpoint
+        try {
+            LOGGER.info("translateEmailBody:: before calling url={} to translate  email_message={}, uuid={}", appProperties.getTranslateToEnglish(), emailMessage, uuid);
+            response = restTemplate.exchange(appProperties.getTranslateToEnglish(), HttpMethod.POST, entity, EmailMessages.class);
+            Instant end = Instant.now();
+            LOGGER.info("translateEmailBody:: after call occurred to url={}, translated_response={}, response_code={}, time_taken={}, uuid={}", appProperties.getTranslateToEnglish(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                return response.getBody().getBodyTranslated();
+            }
+
+            throw new Exception("Unable to translate email_message_id= " + emailMessage.getEmailMessageId() + ",uuid=" + uuid);
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while trying to translate email_message_id={}, uuid={}", emailMessage.getEmailMessageId(), uuid);
+            throw new Exception("Exception occurred while trying to translate email_message_id= "
+                    + emailMessage.getEmailMessageId() + ",uuid=" + uuid, e);
+        }
+    }
+
+    public String detectEmailDominantLanguage(EmailMessages emailMessage, UUID uuid) throws Exception {
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        String jwtToken = CleanPath.cleanString(jwtTokenService.getJwtToken(Constants.AUTO_SUBMITTER));
+        headers.setBearerAuth(jwtToken);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("uuid", uuid.toString());
+        //http entity for rest template
+        HttpEntity<EmailMessages> entity = new HttpEntity<>(emailMessage, headers);
+        //response entity to be returned
+        ResponseEntity<EmailMessages> response = null;
+        //actual call to python rest endpoint
+        try {
+            LOGGER.info("detectEmailDominantLanguage:: before calling url={} for language detection  email_message={}, uuid={}", appProperties.getDetectMainLanguage(), emailMessage, uuid);
+            response = restTemplate.exchange(appProperties.getDetectMainLanguage(), HttpMethod.POST, entity, EmailMessages.class);
+            Instant end = Instant.now();
+            LOGGER.info("detectEmailDominantLanguage:: after call occurred to url={}, language={}, response_code={}, time_taken={}, uuid={}, ", appProperties.getDetectMainLanguage(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                return response.getBody().getLanguage();
+            }
+            throw new Exception("Unable to detect dominant language for email_message_id= "
+                    + emailMessage.getEmailMessageId() + ",uuid=" + uuid);
+
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while trying to detect dominant language for email_message_id={}, uuid={}", emailMessage.getEmailMessageId(), uuid);
+            throw new Exception("Exception occurred while trying to detect dominant language for email_message_id= "
+                    + emailMessage.getEmailMessageId() + ",uuid=" + uuid, e);
+        }
+    }
+
+    public UserInfoDTO getUserInfoDetail(String vzid, UUID uuid) throws Exception {
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<UserInfoDTO> entity = new HttpEntity<>(null, headers);
+        String uri = appProperties.getUserInforDetail();
+        String targetUri = uri.replace("{vzid}", vzid);
+        ResponseEntity<UserInfoDTO> response = null;
+        try {
+            LOGGER.info("getUserInfoDetail:: before calling url={} to fetch user details  getUserInforDetail={}, uuid={}", appProperties.getUserInforDetail(), uuid);
+            response = restTemplate.exchange(targetUri, HttpMethod.GET, entity, UserInfoDTO.class);
+            Instant end = Instant.now();
+            LOGGER.info("getUserInfoDetail: after call occurred to url={}, parsing_response_object={}, response_code={}, time_taken={}, uuid={}", appProperties.getUserInforDetail(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            LOGGER.error("getUserInfoDetail:: exception occurred while trying to fetch user name. Exception={},{}, uuid={}", e.getStackTrace(), e.getMessage(), uuid);
+        }
+        return null;
+    }
+}
+
+
