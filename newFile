@@ -79,3 +79,47 @@ public class TranslateEmailJob {
     }
 
 }
+-----
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(MockitoExtension.class)
+public class TranslateEmailJobTest {
+
+    @Mock
+    private LanguageTranslationServiceV2 languageTranslationServiceV2;
+
+    @Mock
+    private LanguageTranslationService languageTranslationService;
+
+    @InjectMocks
+    private TranslateEmailJob translateEmailJob;
+
+    @Test
+    public void testTranslateTask() {
+        // Mock setup
+        when(languageTranslationServiceV2.someMethod()).thenReturn("mockedResult");
+        when(languageTranslationService.someMethod()).thenReturn("mockedResult");
+
+        // Call the method to test
+        LanguageTranslationTask task = translateEmailJob.translateTask(languageTranslationServiceV2, languageTranslationService);
+
+        // Assertions or verifications based on the task creation
+        assertNotNull(task);
+        assertEquals("mockedResult", task.getSomeValue()); // Example assertion based on task behavior
+
+        // Verify interactions or behavior with mocks if required
+        verify(languageTranslationServiceV2, times(1)).someMethod();
+        verify(languageTranslationService, times(1)).someMethod();
+    }
+
+    // Add more test cases for other methods in the TranslateEmailJob class
+}
+
