@@ -1,1 +1,81 @@
-f
+package com.verizon.ucm.interactionmanagement.job;
+
+import com.verizon.ucm.interactionmanagement.services.LanguageTranslationService;
+import com.verizon.ucm.interactionmanagement.services.LanguageTranslationServiceV2;
+import com.verizon.ucm.interactionmanagement.task.LanguageTranslationTask;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.Date;
+
+@Configuration
+@EnableBatchProcessing
+public class TranslateEmailJob {
+
+    @Autowired
+    private JobLauncher jobLauncher;
+    @Autowired
+    private LanguageTranslationServiceV2 languageTranslationService;
+
+    @Autowired
+    private LanguageTranslationService languageTranslationServiceOld;
+
+    @Autowired
+    PlatformTransactionManager masterTransactionManager;
+    @Value("${isOldBackUpFlowEnabled}")
+    Boolean isOldBackUpFlowEnabled;
+
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TranslateEmailJob.class);
+
+    @Scheduled(cron = "* */3 * * * *")
+    @SchedulerLock(name = "translateLoggedEmailsScheduledJob", lockAtLeastFor = "30S", lockAtMostFor = "50S")
+    public void translateLoggedEmailsScheduledJob() {
+        try {
+            LOGGER.info("translateLoggedEmailsScheduledJobDev:: {}", new Date());
+            JobParameters jobParams = new JobParametersBuilder()
+                    .addString("isOldBackUpFlowEnabled", String.valueOf(isOldBackUpFlowEnabled))
+                    .addString("JobID", String.valueOf(System.currentTimeMillis())).toJobParameters();
+            JobExecution execution = jobLauncher.run(runTranslateEvent(), jobParams);
+            LOGGER.info("translateLoggedEmailsScheduledJobDev finished with this status: {}", execution.getStatus());
+        } catch (Exception ex) {
+            LOGGER.error("translateLoggedEmailsScheduledJobDev not found:", ex);
+        }
+
+    }
+
+    public Job runTranslateEvent() {
+        return new JobBuilder("translateEmailJob", jobRepository).incrementer(new RunIdIncrementer()).flow(step1()).end().build();
+    }
+
+    public Step step1() {
+        return new StepBuilder("step1_translateEmail", jobRepository).tasklet(new LanguageTranslationTask(languageTranslationService, languageTranslationServiceOld), platformTransactionManager)
+                .transactionManager(masterTransactionManager)
+                .build();
+    }
+    
+    @Bean
+    public LanguageTranslationTask translateTask(LanguageTranslationServiceV2 languageTranslationService, LanguageTranslationService languageTranslationServiceOld) {
+        return new LanguageTranslationTask(languageTranslationService, languageTranslationServiceOld);
+    }
+
+}
