@@ -20,3 +20,4 @@
         return null;
     }
 }
+https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}
