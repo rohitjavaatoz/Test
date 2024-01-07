@@ -283,3 +283,63 @@ public void fetchEmailMessageLabels(List<EmailMessageLabelsEntity> emailMessageL
     }
 }
 
+----------------------------------------
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@SpringBootTest
+public class EmailMessageSearchServiceTest {
+
+    @Mock
+    private EmailMessageLabelsRepository emailMessageLabelsRepository;
+
+    @Mock
+    private ExternalParsingEngineImpl externalParsingEngine;
+
+    @Mock
+    private EmailAttachmentsRepository emailAttachmentsRepository;
+
+    @Mock
+    private EmailExtractionMappingRepository emailExtractionMappingRepository;
+
+    @Mock
+    private EmailMessageTPMRequestRepository emailMessageTPMRequestRepository;
+
+    @Mock
+    private EmailMessagesRepository emailMessagesRepository;
+
+    @InjectMocks
+    private EmailMessageSearchService emailMessageSearchService;
+
+    @Test
+    public void testFetchEmailMessageLabels_WhenEmailLabelIsNull() {
+        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
+        EmailMessageLabelsEntity mockEmailMessageLabelsEntity = mock(EmailMessageLabelsEntity.class);
+        when(mockEmailMessageLabelsEntity.getActive()).thenReturn(true);
+        // Mock getEmailLabelsEntity() to return null
+        when(mockEmailMessageLabelsEntity.getEmailLabelsEntity()).thenReturn(null);
+        emailMessageLabelsEntityList.add(mockEmailMessageLabelsEntity);
+
+        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
+        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+
+        UserInfoDTO mockUserInfo = new UserInfoDTO();
+        mockUserInfo.setDisplayName("Test User");
+        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
+
+        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
+
+        // Add assertions to check behavior when emailLabel is null
+        // For example:
+        assertTrue(userLabels.isEmpty()); // Ensure userLabels list is empty
+        assertTrue(emailLabelsList.isEmpty()); // Ensure emailLabelsList is empty
+    }
+}
