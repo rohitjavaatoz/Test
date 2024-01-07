@@ -343,3 +343,81 @@ public class EmailMessageSearchServiceTest {
         assertTrue(emailLabelsList.isEmpty()); // Ensure emailLabelsList is empty
     }
 }
+---------------------------------
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@SpringBootTest
+public class EmailMessageSearchServiceTest {
+
+    @Mock
+    private ExternalParsingEngineImpl externalParsingEngine;
+
+    @InjectMocks
+    private EmailMessageSearchService emailMessageSearchService;
+
+    @Test
+    public void testUserNameNotNull_GetUserInfoDetailCalled() {
+        // Mocking necessary objects and data
+        EmailMessageLabelsEntity emailMessageLabelsEntity = new EmailMessageLabelsEntity();
+        emailMessageLabelsEntity.setActive(true);
+        EmailLabelsEntity emailLabelsEntity = new EmailLabelsEntity();
+        emailLabelsEntity.setEmailLabelName("Manually Processed");
+        emailMessageLabelsEntity.setEmailLabelsEntity(emailLabelsEntity);
+        emailMessageLabelsEntity.setCreatedBy("TestUser");
+
+        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
+        emailMessageLabelsEntityList.add(emailMessageLabelsEntity);
+
+        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
+        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+
+        // Mocking the behavior of externalParsingEngine
+        UserInfoDTO mockUserInfo = new UserInfoDTO();
+        mockUserInfo.setDisplayName("MockDisplayName");
+        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
+
+        // Invoking the method
+        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
+
+        // Assertions
+        assertEquals(1, emailLabelsList.size()); // Ensure that an email label response was added
+        assertEquals("MockDisplayName", emailLabelsList.get(0).getUserName()); // Ensure that the display name was set from mockUserInfo
+    }
+
+    @Test
+    public void testUserNameNull_GetUserInfoDetailNotCalled() {
+        // Mocking necessary objects and data
+        EmailMessageLabelsEntity emailMessageLabelsEntity = new EmailMessageLabelsEntity();
+        emailMessageLabelsEntity.setActive(true);
+        EmailLabelsEntity emailLabelsEntity = new EmailLabelsEntity();
+        emailLabelsEntity.setEmailLabelName("Manually Processed");
+        emailMessageLabelsEntity.setEmailLabelsEntity(emailLabelsEntity);
+        emailMessageLabelsEntity.setCreatedBy(null); // Simulating null userName
+
+        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
+        emailMessageLabelsEntityList.add(emailMessageLabelsEntity);
+
+        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
+        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+
+        // Invoking the method
+        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
+
+        // Assertions
+        assertEquals(1, emailLabelsList.size()); // Ensure that an email label response was added
+        assertNull(emailLabelsList.get(0).getUserName()); // Ensure that userName is null as createdBy is null
+        // Also, assert that externalParsingEngine.getUserInfoDetail() wasn't called due to null createdBy
+        verify(externalParsingEngine, never()).getUserInfoDetail(anyString(), any(UUID.class));
+    }
+}
+
