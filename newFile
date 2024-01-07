@@ -102,3 +102,61 @@ public void fetchEmailMessageLabels(List<EmailMessageLabelsEntity> emailMessageL
 				}
 			}}}
 }
+-------------------------
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class EmailMessageSearchServiceTest {
+
+    @Test
+    public void testFetchEmailMessageLabels() {
+        // Mock dependencies and setup data
+        EmailMessageLabelsRepository emailMessageLabelsRepository = mock(EmailMessageLabelsRepository.class);
+        ExternalParsingEngineImpl externalParsingEngine = mock(ExternalParsingEngineImpl.class);
+        EmailAttachmentsRepository emailAttachmentsRepository = mock(EmailAttachmentsRepository.class);
+        EmailExtractionMappingRepository emailExtractionMappingRepository = mock(EmailExtractionMappingRepository.class);
+        EmailMessageTPMRequestRepository emailMessageTPMRequestRepository = mock(EmailMessageTPMRequestRepository.class);
+        EmailMessagesRepository emailMessagesRepository = mock(EmailMessagesRepository.class);
+        
+        EmailMessageSearchService emailMessageSearchService = new EmailMessageSearchService();
+        emailMessageSearchService.setEmailMessageLabelsRepository(emailMessageLabelsRepository);
+        emailMessageSearchService.setExternalParsingEngine(externalParsingEngine);
+        emailMessageSearchService.setEmailAttachmentsRepository(emailAttachmentsRepository);
+        emailMessageSearchService.setEmailExtractionMappingRepository(emailExtractionMappingRepository);
+        emailMessageSearchService.setEmailMessageTPMRequestRepository(emailMessageTPMRequestRepository);
+        emailMessageSearchService.setEmailMessagesRepository(emailMessagesRepository);
+
+        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
+        // Add test data for emailMessageLabelsEntityList
+        EmailMessageLabelsEntity mockEmailMessageLabelsEntity = mock(EmailMessageLabelsEntity.class);
+        when(mockEmailMessageLabelsEntity.getActive()).thenReturn(true);
+        when(mockEmailMessageLabelsEntity.getEmailLabelId()).thenReturn(123L);
+        // Add more mock setups for EmailMessageLabelsEntity if needed
+        
+        emailMessageLabelsEntityList.add(mockEmailMessageLabelsEntity);
+
+        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
+        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+
+        // Mock the behavior of externalParsingEngine
+        UserInfoDTO mockUserInfo = new UserInfoDTO();
+        mockUserInfo.setDisplayName("Test User");
+        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
+
+        // Call the method to be tested
+        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
+
+        // Assertions or verifications can be added here to ensure the expected behavior
+        // For example:
+        // assertEquals(expectedValue, actualValue);
+        // assertTrue(condition);
+        // assertFalse(condition);
+        // verify(mockedObject, times(n)).someMethod();
+    }
+}
