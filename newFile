@@ -1,156 +1,22 @@
-package com.verizon.ucm.interactionmanagement.job;
-
-import com.verizon.ucm.interactionmanagement.services.LanguageTranslationService;
-import com.verizon.ucm.interactionmanagement.services.LanguageTranslationServiceV2;
-import com.verizon.ucm.interactionmanagement.task.LanguageTranslationTask;
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import java.util.Date;
-
-@Configuration
-@EnableBatchProcessing
-public class TranslateEmailJob {
-
-    @Autowired
-    private JobLauncher jobLauncher;
-    @Autowired
-    private LanguageTranslationServiceV2 languageTranslationService;
-
-    @Autowired
-    private LanguageTranslationService languageTranslationServiceOld;
-
-    @Autowired
-    PlatformTransactionManager masterTransactionManager;
-    @Value("${isOldBackUpFlowEnabled}")
-    Boolean isOldBackUpFlowEnabled;
-
-    @Autowired
-    private JobRepository jobRepository;
-
-    @Autowired
-    private PlatformTransactionManager platformTransactionManager;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TranslateEmailJob.class);
-
-    @Scheduled(cron = "* */3 * * * *")
-    @SchedulerLock(name = "translateLoggedEmailsScheduledJob", lockAtLeastFor = "30S", lockAtMostFor = "50S")
-    public void translateLoggedEmailsScheduledJob() {
+ public UserInfoDTO getUserInfoDetail(String vzid, UUID uuid) throws Exception {
+        Instant start = Instant.now();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        HttpEntity<UserInfoDTO> entity = new HttpEntity<>(null, headers);
+        String uri = appProperties.getUserInforDetail();
+        String targetUri = uri.replace("{vzid}", vzid);
+        ResponseEntity<UserInfoDTO> response = null;
         try {
-            LOGGER.info("translateLoggedEmailsScheduledJobDev:: {}", new Date());
-            JobParameters jobParams = new JobParametersBuilder()
-                    .addString("isOldBackUpFlowEnabled", String.valueOf(isOldBackUpFlowEnabled))
-                    .addString("JobID", String.valueOf(System.currentTimeMillis())).toJobParameters();
-            JobExecution execution = jobLauncher.run(runTranslateEvent(), jobParams);
-            LOGGER.info("translateLoggedEmailsScheduledJobDev finished with this status: {}", execution.getStatus());
-        } catch (Exception ex) {
-            LOGGER.error("translateLoggedEmailsScheduledJobDev not found:", ex);
+            LOGGER.info("getUserInfoDetail:: before calling url={} to fetch user details  getUserInforDetail={}, uuid={}", appProperties.getUserInforDetail(), uuid);
+            response = restTemplate.exchange(targetUri, HttpMethod.GET, entity, UserInfoDTO.class);
+            Instant end = Instant.now();
+            LOGGER.info("getUserInfoDetail: after call occurred to url={}, parsing_response_object={}, response_code={}, time_taken={}, uuid={}", appProperties.getUserInforDetail(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
+            if (response.getStatusCode().value() == 200) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            LOGGER.error("getUserInfoDetail:: exception occurred while trying to fetch user name. Exception={},{}, uuid={}", e.getStackTrace(), e.getMessage(), uuid);
         }
-
+        return null;
     }
-
-    public Job runTranslateEvent() {
-        return new JobBuilder("translateEmailJob", jobRepository).incrementer(new RunIdIncrementer()).flow(step1()).end().build();
-    }
-
-    public Step step1() {
-        return new StepBuilder("step1_translateEmail", jobRepository).tasklet(new LanguageTranslationTask(languageTranslationService, languageTranslationServiceOld), platformTransactionManager)
-                .transactionManager(masterTransactionManager)
-                .build();
-    }
-    
-    @Bean
-    public LanguageTranslationTask translateTask(LanguageTranslationServiceV2 languageTranslationService, LanguageTranslationService languageTranslationServiceOld) {
-        return new LanguageTranslationTask(languageTranslationService, languageTranslationServiceOld);
-    }
-
-}
------
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobLauncher;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
-public class TranslateEmailJobTest {
-
-    @Mock
-    private JobLauncher jobLauncher;
-
-    @Mock
-    private JobRepository jobRepository;
-
-    @Mock
-    private LanguageTranslationServiceV2 languageTranslationServiceV2;
-
-    @Mock
-    private LanguageTranslationService languageTranslationService;
-
-    @Mock
-    private PlatformTransactionManager masterTransactionManager;
-
-    @Mock
-    private PlatformTransactionManager platformTransactionManager;
-
-    @InjectMocks
-    private TranslateEmailJob translateEmailJob;
-
-    @Test
-    public void testTranslateLoggedEmailsScheduledJob() throws Exception {
-        // Mocking isOldBackUpFlowEnabled value
-        when(translateEmailJob.isOldBackUpFlowEnabled).thenReturn(true); // or any other relevant value
-
-        // Mocking job execution
-        JobExecution jobExecution = mock(JobExecution.class);
-        when(jobLauncher.run(any(Job.class), any(JobParameters.class))).thenReturn(jobExecution);
-
-        // Call the method to test
-        translateEmailJob.translateLoggedEmailsScheduledJob();
-
-        // Verify jobLauncher.run() method is called with the correct parameters
-        verify(jobLauncher, times(1)).run(any(Job.class), any(JobParameters.class));
-
-        // Verify other relevant behaviors or assertions based on the jobExecution
-    }
-
-    @Test
-    public void testRunTranslateEvent() {
-        // Implement test logic for runTranslateEvent method
-    }
-
-    @Test
-    public void testStep1() {
-        // Implement test logic for step1 method
-    }
-
-    @Test
-    public void testTranslateTask() {
-        // Implement test logic for translateTask method
-    }
-
-    // Add more test cases for other methods in the TranslateEmailJob class
 }
