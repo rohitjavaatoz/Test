@@ -1,377 +1,27 @@
-
-import java.sql.Timestamp;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.verizon.ucm.interactionmanagement.constants.Constants;
-import com.verizon.ucm.interactionmanagement.dto.ParsingResponseDTO;
-import com.verizon.ucm.interactionmanagement.dto.UserInfoDTO;
-import com.verizon.ucm.interactionmanagement.services.external.ExternalParsingEngineImpl;
-import com.verizon.ucm.interactionmanagement.util.DateTimeConversionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import com.verizon.ucm.interactionmanagement.dto.EmailLabelsResponse;
-import com.verizon.ucm.interactionmanagement.entity.EmailExtractionMappingEntity;
-import com.verizon.ucm.interactionmanagement.entity.EmailMessagesEntity;
-import com.verizon.ucm.interactionmanagement.entity.MessagesEntity;
-import com.verizon.ucm.interactionmanagement.ifc.SubmitterInfoIfc;
-import com.verizon.ucm.interactionmanagement.model.EmailAttachments;
-import com.verizon.ucm.interactionmanagement.model.EmailLabelsEntity;
-import com.verizon.ucm.interactionmanagement.model.EmailMessageExtraction;
-import com.verizon.ucm.interactionmanagement.model.EmailMessageLabelsEntity;
-import com.verizon.ucm.interactionmanagement.model.EmailMessageTPMRequest;
-import com.verizon.ucm.interactionmanagement.model.Party;
-import com.verizon.ucm.interactionmanagement.repository.EmailAttachmentsRepository;
-import com.verizon.ucm.interactionmanagement.repository.EmailExtractionMappingRepository;
-import com.verizon.ucm.interactionmanagement.repository.EmailMessageLabelsRepository;
-import com.verizon.ucm.interactionmanagement.repository.EmailMessageTPMRequestRepository;
-import com.verizon.ucm.interactionmanagement.repository.EmailMessagesRepository;
-import com.verizon.ucm.interactionmanagement.response.EmailMessageSearchResponse;
-import com.verizon.ucm.interactionmanagement.dto.UserLabelSearchResponse;
-
-@Service
-public class EmailMessageSearchService {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(EmailMessageSearchService.class);
-
-	@Autowired
-	protected EmailMessageLabelsRepository emailMessageLabelsRepository;
-	@Autowired
-	ExternalParsingEngineImpl externalParsingEngine;
-	@Autowired
-	private EmailAttachmentsRepository emailAttachmentsRepository;
-	
-	@Autowired
-	private EmailExtractionMappingRepository emailExtractionMappingRepository;
-	
-	@Autowired
-	private EmailMessageTPMRequestRepository emailMessageTPMRequestRepository;
-	
-	@Autowired
-	private EmailMessagesRepository emailMessagesRepository;
-
-	
-public void fetchEmailMessageLabels(List<EmailMessageLabelsEntity> emailMessageLabelsEntityList, List<EmailLabelsResponse> emailLabelsList, List<UserLabelSearchResponse> userLabels, UUID uuid) {
-		if (emailMessageLabelsEntityList != null && !emailMessageLabelsEntityList.isEmpty()) {
-			for (EmailMessageLabelsEntity emailMessageLabelsEntity : emailMessageLabelsEntityList) {
-				if (emailMessageLabelsEntity.getActive() != null && emailMessageLabelsEntity.getActive()) {
-					EmailLabelsEntity emailLabel = emailMessageLabelsEntity.getEmailLabelsEntity();
-					if (emailLabel.getEmailLabelTypeId() != null) {
-						UserLabelSearchResponse userLabelResponse = new UserLabelSearchResponse();
-						userLabelResponse.setLabelId(emailMessageLabelsEntity.getEmailLabelId());
-						userLabelResponse.setLabelName(emailLabel.getEmailLabelName());
-						userLabels.add(userLabelResponse);
-					} else {
-						EmailLabelsResponse emailLabelsResponse = new EmailLabelsResponse();
-						emailLabelsResponse.setLabelName(emailLabel.getEmailLabelName());
-						if (emailLabel.getEmailLabelName() != null) {
-
-							if (emailLabel.getEmailLabelName().equalsIgnoreCase("Manually Processed")) {
-								String userName = emailMessageLabelsEntity.getCreatedBy();
-								if (userName != null) {
-									UserInfoDTO userInfo = null;
-									try {
-										userInfo = externalParsingEngine.getUserInfoDetail(userName, uuid);
-									} catch (Exception e) {
-										throw new RuntimeException(e);
-									}
-									if (userInfo != null && userInfo.getDisplayName() != null) {
-										emailLabelsResponse.setUserName(userInfo.getDisplayName());
-									} else {
-										emailLabelsResponse.setUserName(userName);
-									}
-								}
-							} else if (emailLabel.getEmailLabelName().equalsIgnoreCase("In Progress")) {
-								emailLabelsResponse.setUserName(emailLabel.getCreatedBy());
-							}
-							emailLabelsResponse.setDate(Timestamp.valueOf(emailMessageLabelsEntity.getCreatedDate()));
-							emailLabelsList.add(emailLabelsResponse);
-						}
-					}
-
-				}
-			}}}
-}
--------------------------
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class EmailMessageSearchServiceTest {
 
     @Test
     public void testFetchEmailMessageLabels() {
-        // Mock dependencies and setup data
-        EmailMessageLabelsRepository emailMessageLabelsRepository = mock(EmailMessageLabelsRepository.class);
+        // Mocking necessary objects and dependencies
         ExternalParsingEngineImpl externalParsingEngine = mock(ExternalParsingEngineImpl.class);
-        EmailAttachmentsRepository emailAttachmentsRepository = mock(EmailAttachmentsRepository.class);
-        EmailExtractionMappingRepository emailExtractionMappingRepository = mock(EmailExtractionMappingRepository.class);
-        EmailMessageTPMRequestRepository emailMessageTPMRequestRepository = mock(EmailMessageTPMRequestRepository.class);
-        EmailMessagesRepository emailMessagesRepository = mock(EmailMessagesRepository.class);
-        
-        EmailMessageSearchService emailMessageSearchService = new EmailMessageSearchService();
-        emailMessageSearchService.setEmailMessageLabelsRepository(emailMessageLabelsRepository);
-        emailMessageSearchService.setExternalParsingEngine(externalParsingEngine);
-        emailMessageSearchService.setEmailAttachmentsRepository(emailAttachmentsRepository);
-        emailMessageSearchService.setEmailExtractionMappingRepository(emailExtractionMappingRepository);
-        emailMessageSearchService.setEmailMessageTPMRequestRepository(emailMessageTPMRequestRepository);
-        emailMessageSearchService.setEmailMessagesRepository(emailMessagesRepository);
+        EmailMessageSearchService emailMessageSearchService = new EmailMessageSearchService(externalParsingEngine);
 
-        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
-        // Add test data for emailMessageLabelsEntityList
-        EmailMessageLabelsEntity mockEmailMessageLabelsEntity = mock(EmailMessageLabelsEntity.class);
-        when(mockEmailMessageLabelsEntity.getActive()).thenReturn(true);
-        when(mockEmailMessageLabelsEntity.getEmailLabelId()).thenReturn(123L);
-        // Add more mock setups for EmailMessageLabelsEntity if needed
-        
-        emailMessageLabelsEntityList.add(mockEmailMessageLabelsEntity);
-
-        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
-        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
-        UUID uuid = UUID.randomUUID();
-
-        // Mock the behavior of externalParsingEngine
-        UserInfoDTO mockUserInfo = new UserInfoDTO();
-        mockUserInfo.setDisplayName("Test User");
-        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
-
-        // Call the method to be tested
-        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
-
-        // Assertions or verifications can be added here to ensure the expected behavior
-        // For example:
-        // assertEquals(expectedValue, actualValue);
-        // assertTrue(condition);
-        // assertFalse(condition);
-        // verify(mockedObject, times(n)).someMethod();
-    }
-}
---------------------
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-@SpringBootTest
-public class EmailMessageSearchServiceTest {
-
-    @Mock
-    private EmailMessageLabelsRepository emailMessageLabelsRepository;
-
-    @Mock
-    private ExternalParsingEngineImpl externalParsingEngine;
-
-    @Mock
-    private EmailAttachmentsRepository emailAttachmentsRepository;
-
-    @Mock
-    private EmailExtractionMappingRepository emailExtractionMappingRepository;
-
-    @Mock
-    private EmailMessageTPMRequestRepository emailMessageTPMRequestRepository;
-
-    @Mock
-    private EmailMessagesRepository emailMessagesRepository;
-
-    @InjectMocks
-    private EmailMessageSearchService emailMessageSearchService;
-
-    @Test
-    public void testFetchEmailMessageLabels() {
-        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
-        // Add test data for emailMessageLabelsEntityList
-        EmailMessageLabelsEntity mockEmailMessageLabelsEntity = mock(EmailMessageLabelsEntity.class);
-        when(mockEmailMessageLabelsEntity.getActive()).thenReturn(true);
-        when(mockEmailMessageLabelsEntity.getEmailLabelId()).thenReturn(123L);
-        // Add more mock setups for EmailMessageLabelsEntity if needed
-        emailMessageLabelsEntityList.add(mockEmailMessageLabelsEntity);
-
-        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
-        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
-        UUID uuid = UUID.randomUUID();
-
-        // Mock the behavior of externalParsingEngine
-        UserInfoDTO mockUserInfo = new UserInfoDTO();
-        mockUserInfo.setDisplayName("Test User");
-        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
-
-        // Call the method to be tested
-        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
-
-        // Assertions or verifications can be added here to ensure the expected behavior
-        // For example:
-        // assertEquals(expectedValue, actualValue);
-        // assertTrue(condition);
-        // assertFalse(condition);
-        // verify(mockedObject, times(n)).someMethod();
-    }
-}
-------------------------------------------------
-java.lang.NullPointerException: Cannot invoke "com.verizon.ucm.interactionmanagement.model.EmailLabelsEntity.getEmailLabelTypeId()" because "emailLabel" is null
-
-	at com.verizon.ucm.interactionmanagement.services.search.emailmessages.EmailMessageSearchService.fetchEmailMessageLabels(EmailMessageSearchService.java:204)
-	at com.verizon.ucm.interactionmanagement.services.search.emailmessages.EmailMessageSearchServiceTest.testFetchEmailMessageLabels1(EmailMessageSearchServiceTest.java:506)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:26)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
-	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
-	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:235)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:54)
---------------------------------------------------------
-public void fetchEmailMessageLabels(List<EmailMessageLabelsEntity> emailMessageLabelsEntityList, List<EmailLabelsResponse> emailLabelsList, List<UserLabelSearchResponse> userLabels, UUID uuid) {
-    if (emailMessageLabelsEntityList != null && !emailMessageLabelsEntityList.isEmpty()) {
-        for (EmailMessageLabelsEntity emailMessageLabelsEntity : emailMessageLabelsEntityList) {
-            if (Boolean.TRUE.equals(emailMessageLabelsEntity.getActive())) {
-                EmailLabelsEntity emailLabel = emailMessageLabelsEntity.getEmailLabelsEntity();
-                if (emailLabel != null) { // Check if emailLabel is not null
-                    // existing code...
-
-                    if (emailLabel.getEmailLabelTypeId() != null) {
-                        UserLabelSearchResponse userLabelResponse = new UserLabelSearchResponse();
-                        userLabelResponse.setLabelId(emailMessageLabelsEntity.getEmailLabelId());
-                        userLabelResponse.setLabelName(emailLabel.getEmailLabelName());
-                        userLabels.add(userLabelResponse);
-                    } else {
-                        EmailLabelsResponse emailLabelsResponse = new EmailLabelsResponse();
-                        emailLabelsResponse.setLabelName(emailLabel.getEmailLabelName());
-                        // other conditions and logic...
-                    }
-                }
-            }
-        }
-    }
-}
-
-----------------------------------------
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-@SpringBootTest
-public class EmailMessageSearchServiceTest {
-
-    @Mock
-    private EmailMessageLabelsRepository emailMessageLabelsRepository;
-
-    @Mock
-    private ExternalParsingEngineImpl externalParsingEngine;
-
-    @Mock
-    private EmailAttachmentsRepository emailAttachmentsRepository;
-
-    @Mock
-    private EmailExtractionMappingRepository emailExtractionMappingRepository;
-
-    @Mock
-    private EmailMessageTPMRequestRepository emailMessageTPMRequestRepository;
-
-    @Mock
-    private EmailMessagesRepository emailMessagesRepository;
-
-    @InjectMocks
-    private EmailMessageSearchService emailMessageSearchService;
-
-    @Test
-    public void testFetchEmailMessageLabels_WhenEmailLabelIsNull() {
-        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
-        EmailMessageLabelsEntity mockEmailMessageLabelsEntity = mock(EmailMessageLabelsEntity.class);
-        when(mockEmailMessageLabelsEntity.getActive()).thenReturn(true);
-        // Mock getEmailLabelsEntity() to return null
-        when(mockEmailMessageLabelsEntity.getEmailLabelsEntity()).thenReturn(null);
-        emailMessageLabelsEntityList.add(mockEmailMessageLabelsEntity);
-
-        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
-        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
-        UUID uuid = UUID.randomUUID();
-
-        UserInfoDTO mockUserInfo = new UserInfoDTO();
-        mockUserInfo.setDisplayName("Test User");
-        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
-
-        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
-
-        // Add assertions to check behavior when emailLabel is null
-        // For example:
-        assertTrue(userLabels.isEmpty()); // Ensure userLabels list is empty
-        assertTrue(emailLabelsList.isEmpty()); // Ensure emailLabelsList is empty
-    }
-}
----------------------------------
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-@SpringBootTest
-public class EmailMessageSearchServiceTest {
-
-    @Mock
-    private ExternalParsingEngineImpl externalParsingEngine;
-
-    @InjectMocks
-    private EmailMessageSearchService emailMessageSearchService;
-
-    @Test
-    public void testUserNameNotNull_GetUserInfoDetailCalled() {
-        // Mocking necessary objects and data
         EmailMessageLabelsEntity emailMessageLabelsEntity = new EmailMessageLabelsEntity();
         emailMessageLabelsEntity.setActive(true);
+
         EmailLabelsEntity emailLabelsEntity = new EmailLabelsEntity();
         emailLabelsEntity.setEmailLabelName("Manually Processed");
+
         emailMessageLabelsEntity.setEmailLabelsEntity(emailLabelsEntity);
+        emailMessageLabelsEntity.setEmailLabelId(123L);
         emailMessageLabelsEntity.setCreatedBy("TestUser");
+        emailMessageLabelsEntity.setCreatedDate(new Date());
 
         List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
         emailMessageLabelsEntityList.add(emailMessageLabelsEntity);
@@ -380,44 +30,17 @@ public class EmailMessageSearchServiceTest {
         List<UserLabelSearchResponse> userLabels = new ArrayList<>();
         UUID uuid = UUID.randomUUID();
 
-        // Mocking the behavior of externalParsingEngine
         UserInfoDTO mockUserInfo = new UserInfoDTO();
         mockUserInfo.setDisplayName("MockDisplayName");
+
+        // Mocking the behavior of externalParsingEngine.getUserInfoDetail()
         when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
 
         // Invoking the method
         emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
 
-        // Assertions
-        assertEquals(1, emailLabelsList.size()); // Ensure that an email label response was added
-        assertEquals("MockDisplayName", emailLabelsList.get(0).getUserName()); // Ensure that the display name was set from mockUserInfo
-    }
-
-    @Test
-    public void testUserNameNull_GetUserInfoDetailNotCalled() {
-        // Mocking necessary objects and data
-        EmailMessageLabelsEntity emailMessageLabelsEntity = new EmailMessageLabelsEntity();
-        emailMessageLabelsEntity.setActive(true);
-        EmailLabelsEntity emailLabelsEntity = new EmailLabelsEntity();
-        emailLabelsEntity.setEmailLabelName("Manually Processed");
-        emailMessageLabelsEntity.setEmailLabelsEntity(emailLabelsEntity);
-        emailMessageLabelsEntity.setCreatedBy(null); // Simulating null userName
-
-        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
-        emailMessageLabelsEntityList.add(emailMessageLabelsEntity);
-
-        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
-        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
-        UUID uuid = UUID.randomUUID();
-
-        // Invoking the method
-        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
-
-        // Assertions
-        assertEquals(1, emailLabelsList.size()); // Ensure that an email label response was added
-        assertNull(emailLabelsList.get(0).getUserName()); // Ensure that userName is null as createdBy is null
-        // Also, assert that externalParsingEngine.getUserInfoDetail() wasn't called due to null createdBy
-        verify(externalParsingEngine, never()).getUserInfoDetail(anyString(), any(UUID.class));
+        // Verifying behavior: checking if the emailLabelsList is populated
+        assertFalse(emailLabelsList.isEmpty());
+        assertEquals("MockDisplayName", emailLabelsList.get(0).getUserName());
     }
 }
-
