@@ -21,3 +21,73 @@
     }
 }
 https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}
+----------------
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
+
+class UserInfoServiceTest {
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @InjectMocks
+    private UserInfoService userInfoService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    void testGetUserInfoDetail_Successful() {
+        // Given
+        String vzid = "testVzid";
+        UUID uuid = UUID.randomUUID();
+        String uri = "https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        UserInfoDTO mockUserInfo = new UserInfoDTO(); // create a mock UserInfoDTO
+
+        ResponseEntity<UserInfoDTO> mockResponseEntity = new ResponseEntity<>(mockUserInfo, HttpStatus.OK);
+
+        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), any(HttpEntity.class), eq(UserInfoDTO.class)))
+            .thenReturn(mockResponseEntity);
+
+        // When
+        UserInfoDTO result = userInfoService.getUserInfoDetail(vzid, uuid);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(mockUserInfo, result);
+    }
+
+    @Test
+    void testGetUserInfoDetail_Unsuccessful() {
+        // Given
+        String vzid = "testVzid";
+        UUID uuid = UUID.randomUUID();
+        String uri = "https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<UserInfoDTO> mockResponseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), any(HttpEntity.class), eq(UserInfoDTO.class)))
+            .thenReturn(mockResponseEntity);
+
+        // When
+        UserInfoDTO result = userInfoService.getUserInfoDetail(vzid, uuid);
+
+        // Then
+        assertNull(result);
+    }
+}
