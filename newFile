@@ -44,3 +44,43 @@ public class EmailMessageSearchServiceTest {
         assertEquals("MockDisplayName", emailLabelsList.get(0).getUserName());
     }
 }
+-------------------
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import java.sql.Timestamp;
+import java.util.*;
+
+public class EmailMessageSearchServiceTest {
+
+    @Test
+    public void testFetchEmailMessageLabels() {
+        // Mocking necessary objects and dependencies
+        ExternalParsingEngineImpl externalParsingEngine = mock(ExternalParsingEngineImpl.class);
+        EmailMessageSearchService emailMessageSearchService = new EmailMessageSearchService();
+
+        EmailMessageLabelsEntity emailMessageLabelsEntity = new EmailMessageLabelsEntity();
+        emailMessageLabelsEntity.setEmailLabelsEntity(new EmailLabelsEntity()); // Mocking EmailLabelsEntity without setters
+
+        List<EmailMessageLabelsEntity> emailMessageLabelsEntityList = new ArrayList<>();
+        emailMessageLabelsEntityList.add(emailMessageLabelsEntity);
+
+        List<EmailLabelsResponse> emailLabelsList = new ArrayList<>();
+        List<UserLabelSearchResponse> userLabels = new ArrayList<>();
+        UUID uuid = UUID.randomUUID();
+
+        UserInfoDTO mockUserInfo = new UserInfoDTO();
+        mockUserInfo.setDisplayName("MockDisplayName");
+
+        // Mocking the behavior of externalParsingEngine.getUserInfoDetail()
+        when(externalParsingEngine.getUserInfoDetail(anyString(), any(UUID.class))).thenReturn(mockUserInfo);
+
+        // Invoking the method
+        emailMessageSearchService.fetchEmailMessageLabels(emailMessageLabelsEntityList, emailLabelsList, userLabels, uuid);
+
+        // Verifying behavior: checking if the emailLabelsList is populated
+        assertFalse(emailLabelsList.isEmpty());
+        assertEquals("MockDisplayName", emailLabelsList.get(0).getUserName());
+    }
+}
+
