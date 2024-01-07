@@ -1,93 +1,104 @@
- public UserInfoDTO getUserInfoDetail(String vzid, UUID uuid) throws Exception {
-        Instant start = Instant.now();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        HttpEntity<UserInfoDTO> entity = new HttpEntity<>(null, headers);
-        String uri = appProperties.getUserInforDetail();
-        String targetUri = uri.replace("{vzid}", vzid);
-        ResponseEntity<UserInfoDTO> response = null;
-        try {
-            LOGGER.info("getUserInfoDetail:: before calling url={} to fetch user details  getUserInforDetail={}, uuid={}", appProperties.getUserInforDetail(), uuid);
-            response = restTemplate.exchange(targetUri, HttpMethod.GET, entity, UserInfoDTO.class);
-            Instant end = Instant.now();
-            LOGGER.info("getUserInfoDetail: after call occurred to url={}, parsing_response_object={}, response_code={}, time_taken={}, uuid={}", appProperties.getUserInforDetail(), response.getBody(), response.getStatusCode(), Duration.between(start, end).toMillis(), uuid);
-            if (response.getStatusCode().value() == 200) {
-                return response.getBody();
-            }
-        } catch (Exception e) {
-            LOGGER.error("getUserInfoDetail:: exception occurred while trying to fetch user name. Exception={},{}, uuid={}", e.getStackTrace(), e.getMessage(), uuid);
-        }
-        return null;
-    }
-}
-https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}
-----------------
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
+import java.sql.Timestamp;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-class UserInfoServiceTest {
+import com.verizon.ucm.interactionmanagement.constants.Constants;
+import com.verizon.ucm.interactionmanagement.dto.ParsingResponseDTO;
+import com.verizon.ucm.interactionmanagement.dto.UserInfoDTO;
+import com.verizon.ucm.interactionmanagement.services.external.ExternalParsingEngineImpl;
+import com.verizon.ucm.interactionmanagement.util.DateTimeConversionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
-    @Mock
-    private RestTemplate restTemplate;
+import com.verizon.ucm.interactionmanagement.dto.EmailLabelsResponse;
+import com.verizon.ucm.interactionmanagement.entity.EmailExtractionMappingEntity;
+import com.verizon.ucm.interactionmanagement.entity.EmailMessagesEntity;
+import com.verizon.ucm.interactionmanagement.entity.MessagesEntity;
+import com.verizon.ucm.interactionmanagement.ifc.SubmitterInfoIfc;
+import com.verizon.ucm.interactionmanagement.model.EmailAttachments;
+import com.verizon.ucm.interactionmanagement.model.EmailLabelsEntity;
+import com.verizon.ucm.interactionmanagement.model.EmailMessageExtraction;
+import com.verizon.ucm.interactionmanagement.model.EmailMessageLabelsEntity;
+import com.verizon.ucm.interactionmanagement.model.EmailMessageTPMRequest;
+import com.verizon.ucm.interactionmanagement.model.Party;
+import com.verizon.ucm.interactionmanagement.repository.EmailAttachmentsRepository;
+import com.verizon.ucm.interactionmanagement.repository.EmailExtractionMappingRepository;
+import com.verizon.ucm.interactionmanagement.repository.EmailMessageLabelsRepository;
+import com.verizon.ucm.interactionmanagement.repository.EmailMessageTPMRequestRepository;
+import com.verizon.ucm.interactionmanagement.repository.EmailMessagesRepository;
+import com.verizon.ucm.interactionmanagement.response.EmailMessageSearchResponse;
+import com.verizon.ucm.interactionmanagement.dto.UserLabelSearchResponse;
 
-    @InjectMocks
-    private UserInfoService userInfoService;
+@Service
+public class EmailMessageSearchService {
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmailMessageSearchService.class);
 
-    @Test
-    void testGetUserInfoDetail_Successful() {
-        // Given
-        String vzid = "testVzid";
-        UUID uuid = UUID.randomUUID();
-        String uri = "https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+	@Autowired
+	protected EmailMessageLabelsRepository emailMessageLabelsRepository;
+	@Autowired
+	ExternalParsingEngineImpl externalParsingEngine;
+	@Autowired
+	private EmailAttachmentsRepository emailAttachmentsRepository;
+	
+	@Autowired
+	private EmailExtractionMappingRepository emailExtractionMappingRepository;
+	
+	@Autowired
+	private EmailMessageTPMRequestRepository emailMessageTPMRequestRepository;
+	
+	@Autowired
+	private EmailMessagesRepository emailMessagesRepository;
 
-        UserInfoDTO mockUserInfo = new UserInfoDTO(); // create a mock UserInfoDTO
+	
+public void fetchEmailMessageLabels(List<EmailMessageLabelsEntity> emailMessageLabelsEntityList, List<EmailLabelsResponse> emailLabelsList, List<UserLabelSearchResponse> userLabels, UUID uuid) {
+		if (emailMessageLabelsEntityList != null && !emailMessageLabelsEntityList.isEmpty()) {
+			for (EmailMessageLabelsEntity emailMessageLabelsEntity : emailMessageLabelsEntityList) {
+				if (emailMessageLabelsEntity.getActive() != null && emailMessageLabelsEntity.getActive()) {
+					EmailLabelsEntity emailLabel = emailMessageLabelsEntity.getEmailLabelsEntity();
+					if (emailLabel.getEmailLabelTypeId() != null) {
+						UserLabelSearchResponse userLabelResponse = new UserLabelSearchResponse();
+						userLabelResponse.setLabelId(emailMessageLabelsEntity.getEmailLabelId());
+						userLabelResponse.setLabelName(emailLabel.getEmailLabelName());
+						userLabels.add(userLabelResponse);
+					} else {
+						EmailLabelsResponse emailLabelsResponse = new EmailLabelsResponse();
+						emailLabelsResponse.setLabelName(emailLabel.getEmailLabelName());
+						if (emailLabel.getEmailLabelName() != null) {
 
-        ResponseEntity<UserInfoDTO> mockResponseEntity = new ResponseEntity<>(mockUserInfo, HttpStatus.OK);
+							if (emailLabel.getEmailLabelName().equalsIgnoreCase("Manually Processed")) {
+								String userName = emailMessageLabelsEntity.getCreatedBy();
+								if (userName != null) {
+									UserInfoDTO userInfo = null;
+									try {
+										userInfo = externalParsingEngine.getUserInfoDetail(userName, uuid);
+									} catch (Exception e) {
+										throw new RuntimeException(e);
+									}
+									if (userInfo != null && userInfo.getDisplayName() != null) {
+										emailLabelsResponse.setUserName(userInfo.getDisplayName());
+									} else {
+										emailLabelsResponse.setUserName(userName);
+									}
+								}
+							} else if (emailLabel.getEmailLabelName().equalsIgnoreCase("In Progress")) {
+								emailLabelsResponse.setUserName(emailLabel.getCreatedBy());
+							}
+							emailLabelsResponse.setDate(Timestamp.valueOf(emailMessageLabelsEntity.getCreatedDate()));
+							emailLabelsList.add(emailLabelsResponse);
+						}
+					}
 
-        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), any(HttpEntity.class), eq(UserInfoDTO.class)))
-            .thenReturn(mockResponseEntity);
-
-        // When
-        UserInfoDTO result = userInfoService.getUserInfoDetail(vzid, uuid);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(mockUserInfo, result);
-    }
-
-    @Test
-    void testGetUserInfoDetail_Unsuccessful() {
-        // Given
-        String vzid = "testVzid";
-        UUID uuid = UUID.randomUUID();
-        String uri = "https://kirke-dev.ebiz.verizon.com/api/userInfo?username={vzid}";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ResponseEntity<UserInfoDTO> mockResponseEntity = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        when(restTemplate.exchange(eq(uri), eq(HttpMethod.GET), any(HttpEntity.class), eq(UserInfoDTO.class)))
-            .thenReturn(mockResponseEntity);
-
-        // When
-        UserInfoDTO result = userInfoService.getUserInfoDetail(vzid, uuid);
-
-        // Then
-        assertNull(result);
-    }
+				}
+			}}}
 }
