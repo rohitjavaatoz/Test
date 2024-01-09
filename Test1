@@ -1,4 +1,5 @@
-    @RequestMapping(value = "/email-messages/global-search/{globalId}", produces = {"application/json"}, method = RequestMethod.GET)
+https://verizon.webex.com/wbxmjs/joinservice/sites/verizon/meeting/download/131b0d26b3854a0aafdd3f78874d7962
+@RequestMapping(value = "/email-messages/global-search/{globalId}", produces = {"application/json"}, method = RequestMethod.GET)
 public ResponseEntity<GlobalSearchResponse> globalSearch(String id, UUID uuid) {
         LOGGER.info("globalSearch: Getting the request id or reference id : referenceIdOrrequestId", id, uuid);
         GlobalSearchResponse globalSearchResponse = null;
