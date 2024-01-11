@@ -136,3 +136,333 @@ public class GlobalSearchControllerTest {
         "outageEnd": "2021-09-09T08:23:42.451Z"
     }
 }
+-----
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.List;
+
+public class ChangeRequestDTO {
+
+    private String description;
+    private List<ExternalReference> externalReference;
+    private Location location;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private String plannedEndTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private String plannedStartTime;
+
+    private List<Attachment> attachment;
+    private List<TargetEntity> targetEntity;
+    private List<RelatedParty> relatedParty;
+    private String requestType;
+    private String priority;
+    private Specification specification;
+    private Outage outage;
+
+    // getters and setters
+
+    public class ExternalReference {
+        private String id;
+
+        // getters and setters
+    }
+
+    public class Location {
+        private String name;
+
+        // getters and setters
+    }
+
+    public class Attachment {
+        private String href;
+        private String name;
+        private Size size;
+        private String attachmentType;
+
+        // getters and setters
+
+        public class Size {
+            private double amount;
+
+            // getters and setters
+        }
+    }
+
+    public class TargetEntity {
+        private String name;
+
+        // getters and setters
+    }
+
+    public class RelatedParty {
+        private String name;
+        private String role;
+
+        // additional field with special character
+        private String referredType;
+
+        // getters and setters
+    }
+
+    public class Specification {
+        private String id;
+        private String href;
+        private String name;
+        private String version;
+
+        // additional fields with special characters
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // getters and setters
+    }
+
+    public class Outage {
+        private int outageDuration;
+        private String outageDurationUom;
+        private int outageNumber;
+
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        private String outageStart;
+
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        private String outageEnd;
+
+        // getters and setters
+    }
+}
+------
+public class Application {
+  private String description;
+  ArrayList<Object> externalReference = new ArrayList<Object>();
+  Location LocationObject;
+  private String plannedEndTime;
+  private String plannedStartTime;
+  ArrayList<Object> attachment = new ArrayList<Object>();
+  ArrayList<Object> targetEntity = new ArrayList<Object>();
+  ArrayList<Object> relatedParty = new ArrayList<Object>();
+  private String requestType;
+  private String priority;
+  Specification SpecificationObject;
+  Outage OutageObject;
+
+
+ // Getter Methods 
+
+  public String getDescription() {
+    return description;
+  }
+
+  public Location getLocation() {
+    return LocationObject;
+  }
+
+  public String getPlannedEndTime() {
+    return plannedEndTime;
+  }
+
+  public String getPlannedStartTime() {
+    return plannedStartTime;
+  }
+
+  public String getRequestType() {
+    return requestType;
+  }
+
+  public String getPriority() {
+    return priority;
+  }
+
+  public Specification getSpecification() {
+    return SpecificationObject;
+  }
+
+  public Outage getOutage() {
+    return OutageObject;
+  }
+
+ // Setter Methods 
+
+  public void setDescription( String description ) {
+    this.description = description;
+  }
+
+  public void setLocation( Location locationObject ) {
+    this.LocationObject = locationObject;
+  }
+
+  public void setPlannedEndTime( String plannedEndTime ) {
+    this.plannedEndTime = plannedEndTime;
+  }
+
+  public void setPlannedStartTime( String plannedStartTime ) {
+    this.plannedStartTime = plannedStartTime;
+  }
+
+  public void setRequestType( String requestType ) {
+    this.requestType = requestType;
+  }
+
+  public void setPriority( String priority ) {
+    this.priority = priority;
+  }
+
+  public void setSpecification( Specification specificationObject ) {
+    this.SpecificationObject = specificationObject;
+  }
+
+  public void setOutage( Outage outageObject ) {
+    this.OutageObject = outageObject;
+  }
+}
+public class Outage {
+  private float outageDuration;
+  private String outageDurationUom;
+  private float outageNumber;
+  private String outageStart;
+  private String outageEnd;
+
+
+ // Getter Methods 
+
+  public float getOutageDuration() {
+    return outageDuration;
+  }
+
+  public String getOutageDurationUom() {
+    return outageDurationUom;
+  }
+
+  public float getOutageNumber() {
+    return outageNumber;
+  }
+
+  public String getOutageStart() {
+    return outageStart;
+  }
+
+  public String getOutageEnd() {
+    return outageEnd;
+  }
+
+ // Setter Methods 
+
+  public void setOutageDuration( float outageDuration ) {
+    this.outageDuration = outageDuration;
+  }
+
+  public void setOutageDurationUom( String outageDurationUom ) {
+    this.outageDurationUom = outageDurationUom;
+  }
+
+  public void setOutageNumber( float outageNumber ) {
+    this.outageNumber = outageNumber;
+  }
+
+  public void setOutageStart( String outageStart ) {
+    this.outageStart = outageStart;
+  }
+
+  public void setOutageEnd( String outageEnd ) {
+    this.outageEnd = outageEnd;
+  }
+}
+public class Specification {
+  private String id;
+  private String href;
+  private String name;
+  private String version;
+  private String @referredType;
+  private String @type;
+  private String @schemaLocation;
+  private String @baseType;
+
+
+ // Getter Methods 
+
+  public String getId() {
+    return id;
+  }
+
+  public String getHref() {
+    return href;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public String get@referredType() {
+    return @referredType;
+  }
+
+  public String get@type() {
+    return @type;
+  }
+
+  public String get@schemaLocation() {
+    return @schemaLocation;
+  }
+
+  public String get@baseType() {
+    return @baseType;
+  }
+
+ // Setter Methods 
+
+  public void setId( String id ) {
+    this.id = id;
+  }
+
+  public void setHref( String href ) {
+    this.href = href;
+  }
+
+  public void setName( String name ) {
+    this.name = name;
+  }
+
+  public void setVersion( String version ) {
+    this.version = version;
+  }
+
+  public void set@referredType( String @referredType ) {
+    this.@referredType = @referredType;
+  }
+
+  public void set@type( String @type ) {
+    this.@type = @type;
+  }
+
+  public void set@schemaLocation( String @schemaLocation ) {
+    this.@schemaLocation = @schemaLocation;
+  }
+
+  public void set@baseType( String @baseType ) {
+    this.@baseType = @baseType;
+  }
+}
+public class Location {
+  private String name;
+
+
+ // Getter Methods 
+
+  public String getName() {
+    return name;
+  }
+
+ // Setter Methods 
+
+  public void setName( String name ) {
+    this.name = name;
+  }
+}
