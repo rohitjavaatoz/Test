@@ -76,3 +76,63 @@ public class GlobalSearchControllerTest {
         // Add assertions or handling for no content scenario
     }
 }
+------------
+{
+  "description": "The description of change request",
+  "externalReference": [
+        {
+            "id": "11"
+        }
+    ],
+    "location": {
+        "name": "144 Main Street Tokyo 51663556"
+    },
+  "plannedEndTime": "2021-09-09T06:23:42.451Z",
+  "plannedStartTime": "2021-09-09T08:23:42.451Z",
+  "attachment": [
+    {
+      "href": "URI for this Attachment",
+      "name": "The name of the attachment",
+      "size": {
+      "amount": 128.00
+      },
+      "attachmentType": "picture"
+    }
+  ],
+  "targetEntity": [
+    {
+      "name": "This is the network_element_name"
+    }
+  ],
+  "relatedParty": [
+    {
+      "name": "TMF Telco",
+      "role": "Service Provider",
+       "@referredType": "Organization"
+    },
+    {
+      "name": "John Doe",
+      "role": "requestor",
+       "@referredType": "ChangeRequestor"
+    }
+  ],
+  "requestType": "Standard",
+  "priority": "Low",
+  "specification": {
+        "id": "11",
+        "href": "https://mycsp.com:8080/tmf-api/entityCatalogManagement/v4/entitySpecification/11",
+        "name": "Change",
+        "version": "1.0",
+        "@referredType": "ChangeManagementSpecification",
+        "@type": "EntitySpecification",
+        "@schemaLocation": "https://mycsp.com:8080/tmf-api/schema/Common/EntitySpecification.schema.json",
+        "@baseType": "EntitySpecification"
+    },
+  "outage": {
+        "outageDuration": 120,
+        "outageDurationUom": "minute",
+        "outageNumber": 1,
+        "outageStart": "2021-09-09T06:23:42.451Z",
+        "outageEnd": "2021-09-09T08:23:42.451Z"
+    }
+}
