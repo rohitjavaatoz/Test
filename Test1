@@ -466,3 +466,5 @@ public class Location {
     this.name = name;
   }
 }
+-----
+externalReference,location,plannedEndTime,plannedStartTime,targetEntity,relatedParty,requestType,priority,specification
