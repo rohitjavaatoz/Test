@@ -1,3 +1,29 @@
+CREATE TABLE IF NOT EXISTS ucmcmt.base_model_entities
+(
+    base_model_entity_id integer NOT NULL DEFAULT nextval('base_model_entities_id_seq'::regclass),
+    start_date timestamp without time zone,
+    start_date_conf integer,
+    end_date timestamp without time zone,
+    end_date_conf integer,
+    outage_duration integer,
+    outage_duration_conf integer,
+    outage_duration_uom character varying COLLATE pg_catalog."default",
+    outage_duration_uom_conf integer,
+    city character varying COLLATE pg_catalog."default",
+    city_conf integer,
+    state character varying COLLATE pg_catalog."default",
+    state_conf integer,
+    country character varying COLLATE pg_catalog."default",
+    country_conf integer,
+    email_message_id integer,
+    created_date timestamp without time zone,
+    CONSTRAINT base_model_entities_id_pkey PRIMARY KEY (base_model_entity_id),
+    CONSTRAINT email_message_id_fkey FOREIGN KEY (email_message_id)
+        REFERENCES ucmcmt.email_messages (email_message_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+-----------------------------------------------
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
