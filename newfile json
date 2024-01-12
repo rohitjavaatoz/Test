@@ -14,6 +14,57 @@ CREATE TABLE IF NOT EXISTS ucmcmt.api_messages
     is_fiber boolean,
     CONSTRAINT api_message_id_pkey PRIMARY KEY (api_message_id)
 )
+----
+import javax.persistence.*;
+import java.sql.Timestamp;
+
+@Entity
+@Table(name = "ucmcmt.api_messages")
+public class ApiMessage {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "api_message_id")
+    private Integer apiMessageId;
+
+    @Column(name = "message_id")
+    private Integer messageId;
+
+    @Column(name = "api_payload", columnDefinition = "json")
+    private String apiPayload;
+
+    @Column(name = "party_id")
+    private Integer partyId;
+
+    @Column(name = "created_date")
+    private Timestamp createdDate;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "modified_date")
+    private Timestamp modifiedDate;
+
+    @Column(name = "modified_by")
+    private String modifiedBy;
+
+    @Column(name = "api_message_status_id")
+    private Integer apiMessageStatusId;
+
+    @Column(name = "parent_api_message_id")
+    private Integer parentApiMessageId;
+
+    @Column(name = "retry_request_creation_count")
+    private Integer retryRequestCreationCount;
+
+    @Column(name = "is_fiber")
+    private Boolean isFiber;
+
+    // Constructors, getters, and setters
+
+    // Add constructors, getters, and setters here
+}
+
 -----------------------------------------------
 import com.fasterxml.jackson.annotation.JsonFormat;
 
