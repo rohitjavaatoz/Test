@@ -1,3 +1,7 @@
+ALTER TABLE ucmcmt.api_messages
+ALTER COLUMN api_message_id
+SET DEFAULT nextval('ucmcmt.api_messages_api_message_id_seq'::regclass);
+---------
 SELECT *
 FROM pg_sequences
 WHERE sequencename = 'ucmcmt.api_messages_api_message_id_seq';
