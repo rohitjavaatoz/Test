@@ -1,20 +1,130 @@
-{"@timestamp":"2024-01-14T22:59:04.055+05:30","@version":"1","message":"Initializing Spring DispatcherServlet 'dispatcherServlet'","logger_name":"org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:04.056+05:30","@version":"1","message":"Initializing Servlet 'dispatcherServlet'","logger_name":"org.springframework.web.servlet.DispatcherServlet","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:04.059+05:30","@version":"1","message":"Completed initialization in 3 ms","logger_name":"org.springframework.web.servlet.DispatcherServlet","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:04.149+05:30","@version":"1","message":"JwtAuthenticationFilter#doFilterInternal: jwt_token=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I, uuid= 9dd2a12e-35ef-4672-92e5-403aa3971631","logger_name":"com.verizon.ucm.interactionmanagement.config.JwtAuthenticationFilter","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:04.155+05:30","@version":"1","message":"JwtAuthenticationFilter#getUserDetail:after authentication: jwt_token=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I, uuid= 9dd2a12e-35ef-4672-92e5-403aa3971631, clientId=kirkeadm1n, clientSec=admin, url=https://kirke-dev-one.ebiz.verizon.com/iamservices/api/ucm/iam/claims, body={\"token\":\"\"}","logger_name":"com.verizon.ucm.interactionmanagement.config.JwtAuthenticationFilter","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:04.451+05:30","@version":"1","message":"Rest call for host kirke-dev-one.ebiz.verizon.com","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:04.458+05:30","@version":"1","message":"Request body to call generate jwtToken : <POST https://kirke-dev-one.ebiz.verizon.com/iamservices/api/ucm/iam/generateToken,{role=SCHEDULER, userName=SCHEDULER_NAME, email=scheduler@verizon.com},[Accept:\"application/json\"]>","logger_name":"com.verizon.ucm.interactionmanagement.util.JwtUtils","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.073+05:30","@version":"1","message":"adding service auth header eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MDUyNTMzNDUsInJvbGUiOiJTQ0hFRFVMRVIiLCJ1c2VyTmFtZSI6IlNDSEVEVUxFUl9OQU1FIiwiZW1haWwiOiJzY2hlZHVsZXJAdmVyaXpvbi5jb20iLCJzY29wZSI6InJlYWQgd3JpdGUiLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl19.mmfDeUsxDgG-2jRRHgS0qIGd0YyHpwlohgaidEz90XI ","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.075+05:30","@version":"1","message":" Request: POST https://kirke-dev-one.ebiz.verizon.com/iamservices/api/ucm/iam/claims?token=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.077+05:30","@version":"1","message":"Headers: [Accept:\"application/json, application/*+json\", Content-Type:\"text/plain;charset=ISO-8859-1\", Content-Length:\"12\", uuid:\"1ad68661-8608-4e04-86e8-73eadb593424\", Authorization:\"Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MDUyNTMzNDUsInJvbGUiOiJTQ0hFRFVMRVIiLCJ1c2VyTmFtZSI6IlNDSEVEVUxFUl9OQU1FIiwiZW1haWwiOiJzY2hlZHVsZXJAdmVyaXpvbi5jb20iLCJzY29wZSI6InJlYWQgd3JpdGUiLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiLCJST0xFX0FETUlOIl19.mmfDeUsxDgG-2jRRHgS0qIGd0YyHpwlohgaidEz90XI\"]","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.077+05:30","@version":"1","message":"Body: \n{\"token\":\"\"}","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.121+05:30","@version":"1","message":"Response: 200 OK 200 OK ","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.122+05:30","@version":"1","message":"Headers: [Date:\"Sun, 14 Jan 2024 17:29:05 GMT\", Content-Type:\"application/json\", Transfer-Encoding:\"chunked\", Connection:\"keep-alive\", Server:\"nginx/1.20.2\", vary:\"accept-encoding\"]","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.123+05:30","@version":"1","message":"Body: \n{\"name\":\"Malvi, Rohit\",\"iat\":1690985808,\"email\":\"rohit.malvi@one.verizon.com\"}","logger_name":"com.verizon.ucm.interactionmanagement.config.RestTemplateInterceptor","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.149+05:30","@version":"1","message":"JwtAuthenticationFilter#doFilterInternal: jwt_token=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I, uuid=9dd2a12e-35ef-4672-92e5-403aa3971631, response=JwtValidationResponseDTO [vzid=null, id=null, email=rohit.malvi@one.verizon.com, authorities=null, username=null]","logger_name":"com.verizon.ucm.interactionmanagement.config.JwtAuthenticationFilter","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.152+05:30","@version":"1","message":"JwtAuthenticationFilter#doFilterInternal:after authentication: jwt_token=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I, uuid= 9dd2a12e-35ef-4672-92e5-403aa3971631","logger_name":"com.verizon.ucm.interactionmanagement.config.JwtAuthenticationFilter","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.154+05:30","@version":"1","message":"JwtAuthenticationFilter#doFilterInternal:before set authentication: jwt_token=eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I, uuid= 9dd2a12e-35ef-4672-92e5-403aa3971631","logger_name":"com.verizon.ucm.interactionmanagement.config.JwtAuthenticationFilter","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.154+05:30","@version":"1","message":"JwtAuthenticationFilter#doFilterInternal:before do filter: auth_header=Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTA5ODU4MDgsIm5hbWUiOiJNYWx2aSwgUm9oaXQiLCJlbWFpbCI6InJvaGl0Lm1hbHZpQG9uZS52ZXJpem9uLmNvbSJ9.h_QGqIR-u69cSzGEbtvbzOKJCBKTqzbn2229rsHrF9I, uuid= 9dd2a12e-35ef-4672-92e5-403aa3971631","logger_name":"com.verizon.ucm.interactionmanagement.config.JwtAuthenticationFilter","thread_name":"http-nio-8080-exec-10","level":"INFO","level_value":20000}
-{"@timestamp":"2024-01-14T22:59:05.160+05:30","@version":"1","message":"Cache miss for REQUEST dispatch to '/api-messages/message' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.","logger_name":"org.springframework.web.servlet.handler.HandlerMappingIntrospector","thread_name":"http-nio-8080-exec-10","level":"WARN","level_value":30000}
-{"@timestamp":"2024-01-14T22:59:05.271+05:30","@version":"1","message":"Resolved [org.springframework.web.HttpMediaTypeNotSupportedException: Content-Type is not supported]","logger_name":"org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver","thread_name":"http-nio-8080-exec-10","level":"WARN","level_value":30000}
+-- Table: ucmcmt.email_messages
+
+-- DROP TABLE IF EXISTS ucmcmt.email_messages;
+
+CREATE TABLE IF NOT EXISTS ucmcmt.email_messages
+(
+    email_message_id integer NOT NULL GENERATED BY DEFAULT AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    message_id integer NOT NULL,
+    header_id character varying(200) COLLATE pg_catalog."default",
+    subject text COLLATE pg_catalog."default",
+    body_html text COLLATE pg_catalog."default",
+    body_text text COLLATE pg_catalog."default",
+    body_translated text COLLATE pg_catalog."default",
+    language character varying(20) COLLATE pg_catalog."default",
+    party_id integer,
+    created_date timestamp without time zone,
+    created_by character varying COLLATE pg_catalog."default",
+    modified_date timestamp without time zone,
+    modified_by character varying COLLATE pg_catalog."default",
+    is_seen boolean,
+    email_message_status_id integer,
+    is_locked boolean,
+    locked_by character varying(225) COLLATE pg_catalog."default",
+    locked_at timestamp without time zone,
+    parent_email_message_id integer,
+    retry_request_creation_count integer,
+    is_fiber boolean,
+    CONSTRAINT email_messages_pkey PRIMARY KEY (email_message_id),
+    CONSTRAINT email_message_status_fkkey FOREIGN KEY (email_message_status_id)
+        REFERENCES ucmcmt.email_message_status (email_message_status_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT message_fk FOREIGN KEY (message_id)
+        REFERENCES ucmcmt.messages (message_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT party_fk FOREIGN KEY (party_id)
+        REFERENCES ucmcmt.party (key) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS ucmcmt.email_messages
+    OWNER to ucm_app;
+
+REVOKE ALL ON TABLE ucmcmt.email_messages FROM wuwe4gy;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON TABLE ucmcmt.email_messages TO ivchevl;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON TABLE ucmcmt.email_messages TO negisu6;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON TABLE ucmcmt.email_messages TO nomusa1;
+
+GRANT ALL ON TABLE ucmcmt.email_messages TO ucm_app;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON TABLE ucmcmt.email_messages TO wuwe4gy;
+-- Index: idx_created_date
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_created_date;
+
+CREATE INDEX IF NOT EXISTS idx_created_date
+    ON ucmcmt.email_messages USING btree
+    (created_date ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_email_message_status_id
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_email_message_status_id;
+
+CREATE INDEX IF NOT EXISTS idx_email_message_status_id
+    ON ucmcmt.email_messages USING btree
+    (email_message_status_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_email_messages_email_message_id
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_email_messages_email_message_id;
+
+CREATE INDEX IF NOT EXISTS idx_email_messages_email_message_id
+    ON ucmcmt.email_messages USING btree
+    (email_message_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_email_messages_email_message_status_id
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_email_messages_email_message_status_id;
+
+CREATE INDEX IF NOT EXISTS idx_email_messages_email_message_status_id
+    ON ucmcmt.email_messages USING btree
+    (email_message_status_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_email_messages_is_fiber
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_email_messages_is_fiber;
+
+CREATE INDEX IF NOT EXISTS idx_email_messages_is_fiber
+    ON ucmcmt.email_messages USING btree
+    (is_fiber ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_email_messages_subject_gin_idx
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_email_messages_subject_gin_idx;
+
+CREATE INDEX IF NOT EXISTS idx_email_messages_subject_gin_idx
+    ON ucmcmt.email_messages USING gin
+    (lower(subject) COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+-- Index: idx_locked_by
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_locked_by;
+
+CREATE INDEX IF NOT EXISTS idx_locked_by
+    ON ucmcmt.email_messages USING btree
+    (locked_by COLLATE pg_catalog."default" ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_message_id
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_message_id;
+
+CREATE INDEX IF NOT EXISTS idx_message_id
+    ON ucmcmt.email_messages USING btree
+    (message_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+-- Index: idx_party_id
+
+-- DROP INDEX IF EXISTS ucmcmt.idx_party_id;
+
+CREATE INDEX IF NOT EXISTS idx_party_id
+    ON ucmcmt.email_messages USING btree
+    (party_id ASC NULLS LAST)
+    TABLESPACE pg_default;
