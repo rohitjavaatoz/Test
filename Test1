@@ -1,4 +1,10 @@
-
+CREATE SEQUENCE ucmcmt.email_messages_email_message_id_seq
+    INCREMENT BY 1
+    START WITH 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+-------------------
 
 
 CREATE SEQUENCE ucmcmt.api_messages_api_message_id_seq
