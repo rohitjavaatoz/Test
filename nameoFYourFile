@@ -1,0 +1,59 @@
+{
+  "priority": "string",
+  "targetEntity": [
+    {
+      "name": "string"
+    }
+  ],
+  "specification": {
+        "id":"string",
+        "href": "string",
+        "name": "string",
+        "version": "string",
+        "@referredType": "string",
+        "@type": "string",
+        "@schemaLocation": "string",
+        "@baseType": "string"
+    },
+  "plannedStartTime": DateTime,
+  "plannedEndTime": DateTime,  
+  “requestType”: "string",  
+  "externalReference": [
+        {
+            "id": "string",
+        }
+    ],
+    "location": {
+        "name": "string",
+    },
+  "relatedParty": [
+    {
+      "name": "string",
+      "role": "string",
+       "@referredType": "string",
+    },
+    {
+      "name": "string",
+      "role": "string",
+       "@referredType": "string",
+    }
+  ],
+  "description": "string",
+  "attachment": [
+    {
+      "href": "string",
+      "name": "string",
+      "size": {
+      “amount”: float
+      },
+      "attachmentType": "string"
+    }
+  ],
+  "outage": {
+        "outageDuration": integer,
+        "outageDurationUom": "string",
+        "outageNumber": integer,
+        "outageStart": DateTime,
+        "outageEnd": DateTime
+    }
+}
