@@ -1,12 +1,12 @@
 {
-  "priority": "string",
-  "targetEntity": [
-    {
-      "name": "string"
-    }
-  ],
-  "specification": {
-        "id":"string",
+    "priority": "string",
+    "targetEntity": [
+        {
+            "name": "string"
+        }
+    ],
+    "specification": {
+        "id": "string",
         "href": "string",
         "name": "string",
         "version": "string",
@@ -15,45 +15,45 @@
         "@schemaLocation": "string",
         "@baseType": "string"
     },
-  "plannedStartTime": DateTime,
-  "plannedEndTime": DateTime,  
-  “requestType”: "string",  
-  "externalReference": [
+    "plannedStartTime": "DateTime",
+    "plannedEndTime": "DateTime",  
+  "requestType": "string",
+    "externalReference": [
         {
-            "id": "string",
+            "id": "string"
         }
     ],
     "location": {
-        "name": "string",
+        "name": "string"
     },
-  "relatedParty": [
-    {
-      "name": "string",
-      "role": "string",
-       "@referredType": "string",
-    },
-    {
-      "name": "string",
-      "role": "string",
-       "@referredType": "string",
-    }
-  ],
-  "description": "string",
-  "attachment": [
-    {
-      "href": "string",
-      "name": "string",
-      "size": {
-      “amount”: float
-      },
-      "attachmentType": "string"
-    }
-  ],
-  "outage": {
-        "outageDuration": integer,
+    "relatedParty": [
+        {
+            "name": "string",
+            "role": "string",
+            "@referredType": "string"
+        },
+        {
+            "name": "string",
+            "role": "string",
+            "@referredType": "string"
+        }
+    ],
+    "description": "string",
+    "attachment": [
+        {
+            "href": "string",
+            "name": "string",
+            "size": {
+      "amount": "float"
+            },
+            "attachmentType": "string"
+        }
+    ],
+    "outage": {
+        "outageDuration": "integer",
         "outageDurationUom": "string",
-        "outageNumber": integer,
-        "outageStart": DateTime,
-        "outageEnd": DateTime
+        "outageNumber": "integer",
+        "outageStart":" DateTime",
+        "outageEnd": "DateTime"
     }
 }
