@@ -1,3 +1,57 @@
+INSERT INTO ucmcmt.api_messages (
+    party_id,
+    created_by
+    -- other_columns_if_needed
+)
+SELECT
+    p.id AS party_id,
+    p.created_by AS created_by
+    -- other_values_if_needed
+FROM
+    ucmcmt.party p
+WHERE
+    p.party_name = 'your_received_party_name';
+------
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
+
+public interface ApiMessagesRepository extends JpaRepository<ApiMessages, Long> {
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by) " +
+            "SELECT p.id AS party_id, p.created_by AS created_by " +
+            "FROM ucmcmt.party p " +
+            "WHERE p.party_name = :partyName", nativeQuery = true)
+    void insertIntoApiMessages(@Param("partyName") String partyName);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- Table: ucmcmt.api_messages
 
 -- DROP TABLE IF EXISTS ucmcmt.api_messages;
