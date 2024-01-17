@@ -1,3 +1,29 @@
+-- Table: ucmcmt.api_messages
+
+-- DROP TABLE IF EXISTS ucmcmt.api_messages;
+
+CREATE TABLE IF NOT EXISTS ucmcmt.api_messages
+(
+    api_message_id integer NOT NULL DEFAULT nextval('email_messages_email_message_id_seq'::regclass),
+    message_id integer,
+    api_payload json,
+    party_id integer,
+    created_date timestamp without time zone,
+    created_by character varying COLLATE pg_catalog."default",
+    modified_date timestamp without time zone,
+    modified_by character varying COLLATE pg_catalog."default",
+    api_message_status_id integer,
+    parent_api_message_id integer,
+    retry_request_creation_count integer,
+    is_fiber boolean,
+    CONSTRAINT api_message_id_pkey PRIMARY KEY (api_message_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS ucmcmt.api_messages
+    OWNER to ucmqa;
+--------------------
 -- Table: ucmcmt.party
 
 -- DROP TABLE IF EXISTS ucmcmt.party;
