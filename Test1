@@ -1,3 +1,25 @@
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+public interface SecondTableRepository extends CrudRepository<SecondTableEntity, Long> {
+
+    @Modifying
+    @Transactional
+    @Query("INSERT INTO SecondTableEntity (firstTableId, otherFields) " +
+           "SELECT ft.id, :otherFields " +
+           "FROM FirstTableEntity ft " +
+           "WHERE ft.name = :firstName")
+    void insertIntoSecondTable(@Param("firstName") String firstName, @Param("otherFields") String otherFields);
+}
+INSERT INTO second_table (first_table_id, other_fields)
+SELECT ft.id, 'your_other_fields'
+FROM first_table ft
+WHERE ft.name = 'your_first_table_name';
+
+
+
 ALTER TABLE ucmcmt.api_messages
 ALTER COLUMN api_message_id
 SET DEFAULT nextval('ucmcmt.api_messages_api_message_id_seq'::regclass);
