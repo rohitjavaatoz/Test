@@ -1,3 +1,244 @@
+{
+  "id": "string",
+  "href": "string",
+  "priority": "string",
+  "targetEntity": [
+    {
+      "id": "string",
+      "href": "string",
+      "name": "string",
+      "role": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "specification": {
+    "id": "string",
+    "href": "string",
+    "name": "string",
+    "version": "string",
+    "@referredType": "string",
+    "@type": "string",
+    "@schemaLocation": "string",
+    "@baseType": "string"
+  },
+  "plannedStartTime": "2024-01-18T12:26:23.760Z",
+  "plannedEndTime": "2024-01-18T12:26:23.760Z",
+  "requestType": "string",
+  "externalReference": [
+    {
+      "id": "string",
+      "externalReferenceType": "string",
+      "name": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "location": [
+    {
+      "id": "string",
+      "href": "string",
+      "name": "string",
+      "city": "string",
+      "state": "string",
+      "country": "string",
+      "role": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "relatedParty": [
+    {
+      "id": "string",
+      "href": "string",
+      "name": "string",
+      "role": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "description": "string",
+  "attachment": [
+    {
+      "description": "string",
+      "href": "string",
+      "id": "string",
+      "url": "string",
+      "name": "string",
+      "attachmentType": "string",
+      "content": "string",
+      "mimeType": "string",
+      "path": "string",
+      "size": {
+        "amount": 0,
+        "units": "string"
+      },
+      "sizeUnit": 0,
+      "validFor": {
+        "endDateTime": "2024-01-18T12:26:23.760Z",
+        "startDateTime": "2024-01-18T12:26:23.760Z"
+      },
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "outage": {
+    "outageDuration": 0,
+    "outageDurationUom": "string",
+    "outageNumber": 0,
+    "outageStart": "2024-01-18T12:26:23.760Z",
+    "outageEnd": "2024-01-18T12:26:23.760Z"
+  },
+  "channel": "string",
+  "impact": "string",
+  "requestDate": "2024-01-18T12:26:23.760Z",
+  "scheduledDate": "2024-01-18T12:26:23.760Z",
+  "actualStartTime": "2024-01-18T12:26:23.760Z",
+  "actualEndTime": "2024-01-18T12:26:23.760Z",
+  "completionDate": "2024-01-18T12:26:23.760Z",
+  "risk": "string",
+  "riskMitigationPlan": "string",
+  "riskValue": "string",
+  "status": "string",
+  "statusChangeDate": "2024-01-18T12:26:23.760Z",
+  "statusChangeReason": "string",
+  "budget": {
+    "unit": "string",
+    "value": 0,
+    "@type": "string",
+    "@schemaLocation": "string",
+    "@baseType": "string"
+  },
+  "changeRelationship": [
+    {
+      "id": "string",
+      "href": "string",
+      "relationshipType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "changeRequestCharacteristic": [
+    {
+      "id": "string",
+      "name": "string",
+      "value": "string",
+      "valueType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "impactEntity": [
+    {
+      "id": "string",
+      "href": "string",
+      "name": "string",
+      "role": "string",
+      "action": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "note": [
+    {
+      "author": "string",
+      "date": "2024-01-18T12:26:23.760Z",
+      "text": "string",
+      "id": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "problemTicket": [
+    {
+      "id": "string",
+      "href": "string",
+      "name": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "resolution": {
+    "code": "string",
+    "description": "string",
+    "name": "string",
+    "task": [
+      {
+        "description": "string",
+        "name": "string",
+        "state": "string",
+        "@type": "string",
+        "@schemaLocation": "string",
+        "@baseType": "string"
+      }
+    ],
+    "@type": "string",
+    "@schemaLocation": "string",
+    "@baseType": "string"
+  },
+  "workLog": [
+    {
+      "createDateTime": "2024-01-18T12:26:23.760Z",
+      "description": "string",
+      "lastUpdateDateTime": "string",
+      "record": [
+        {
+          "dateTime": "2024-01-18T12:26:23.760Z",
+          "description": "string",
+          "supportPerson": "string",
+          "@type": "string",
+          "@schemaLocation": "string",
+          "@baseType": "string"
+        }
+      ],
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "sla": [
+    {
+      "href": "string",
+      "id": "string",
+      "name": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "troubleTicket": [
+    {
+      "href": "string",
+      "id": "string",
+      "name": "string",
+      "@referredType": "string",
+      "@type": "string",
+      "@schemaLocation": "string",
+      "@baseType": "string"
+    }
+  ],
+  "@type": "string",
+  "@schemaLocation": "string",
+  "@baseType": "string"
+}
+
+============================================
 INSERT INTO ucmcmt.api_messages (party_id, created_by, ucmId)
 SELECT p.id, p.created_by, 2
 FROM ucmcmt.party p
