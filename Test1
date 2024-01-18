@@ -1,3 +1,303 @@
+import java.util.List;
+
+public class ApiResponse {
+    private String id;
+    private String href;
+    private String priority;
+    private List<TargetEntity> targetEntity;
+    private Specification specification;
+    private String plannedStartTime;
+    private String plannedEndTime;
+    private String requestType;
+    private List<ExternalReference> externalReference;
+    private List<Location> location;
+    private List<RelatedParty> relatedParty;
+    private String description;
+    private List<Attachment> attachment;
+    private Outage outage;
+    private String channel;
+    private String impact;
+    private String requestDate;
+    private String scheduledDate;
+    private String actualStartTime;
+    private String actualEndTime;
+    private String completionDate;
+    private String risk;
+    private String riskMitigationPlan;
+    private String riskValue;
+    private String status;
+    private String statusChangeDate;
+    private String statusChangeReason;
+    private Budget budget;
+    private List<ChangeRelationship> changeRelationship;
+    private List<ChangeRequestCharacteristic> changeRequestCharacteristic;
+    private List<ImpactEntity> impactEntity;
+    private List<Note> note;
+    private List<ProblemTicket> problemTicket;
+    private Resolution resolution;
+    private List<WorkLog> workLog;
+    private List<Sla> sla;
+    private List<TroubleTicket> troubleTicket;
+    private String type;
+    private String schemaLocation;
+    private String baseType;
+
+    // Getter and Setter methods for all fields
+
+    // Nested classes for inner structures
+    public static class TargetEntity {
+        private String id;
+        private String href;
+        private String name;
+        private String role;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Specification {
+        private String id;
+        private String href;
+        private String name;
+        private String version;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class ExternalReference {
+        private String id;
+        private String externalReferenceType;
+        private String name;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Location {
+        private String id;
+        private String href;
+        private String name;
+        private String city;
+        private String state;
+        private String country;
+        private String role;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class RelatedParty {
+        private String id;
+        private String href;
+        private String name;
+        private String role;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Attachment {
+        private String description;
+        private String href;
+        private String id;
+        private String url;
+        private String name;
+        private String attachmentType;
+        private String content;
+        private String mimeType;
+        private String path;
+        private Size size;
+        private long sizeUnit;
+        private ValidFor validFor;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Size {
+        private long amount;
+        private String units;
+
+        // Getter and Setter methods
+    }
+
+    public static class ValidFor {
+        private String endDateTime;
+        private String startDateTime;
+
+        // Getter and Setter methods
+    }
+
+    public static class Outage {
+        private long outageDuration;
+        private String outageDurationUom;
+        private long outageNumber;
+        private String outageStart;
+        private String outageEnd;
+
+        // Getter and Setter methods
+    }
+
+    public static class Budget {
+        private String unit;
+        private long value;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class ChangeRelationship {
+        private String id;
+        private String href;
+        private String relationshipType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class ChangeRequestCharacteristic {
+        private String id;
+        private String name;
+        private String value;
+        private String valueType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class ImpactEntity {
+        private String id;
+        private String href;
+        private String name;
+        private String role;
+        private String action;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Note {
+        private String author;
+        private String date;
+        private String text;
+        private String id;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class ProblemTicket {
+        private String id;
+        private String href;
+        private String name;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Resolution {
+        private String code;
+        private String description;
+        private String name;
+        private List<Task> task;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Task {
+        private String description;
+        private String name;
+        private String state;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class WorkLog {
+        private String createDateTime;
+        private String description;
+        private String lastUpdateDateTime;
+        private List<Record> record;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Record {
+        private String dateTime;
+        private String description;
+        private String supportPerson;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class Sla {
+        private String href;
+        private String id;
+        private String name;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+
+    public static class TroubleTicket {
+        private String href;
+        private String id;
+        private String name;
+        private String referredType;
+        private String type;
+        private String schemaLocation;
+        private String baseType;
+
+        // Getter and Setter methods
+    }
+}
+
+--------------------------
 {
   "id": "string",
   "href": "string",
