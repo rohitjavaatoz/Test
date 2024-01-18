@@ -1,3 +1,10 @@
+INSERT INTO ucmcmt.api_messages (party_id, created_by, ucmId)
+SELECT p.id, p.created_by, 2
+FROM ucmcmt.party p
+WHERE p.party_name = 'your_received_party_name'
+RETURNING *; -- You can specify the columns you want to return or use * to return all columns
+
+-----------------
 INSERT INTO ucmcmt.api_messages (
     party_id,
     created_by
