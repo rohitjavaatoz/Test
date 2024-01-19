@@ -1,0 +1,21 @@
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class RequestController {
+
+    @PostMapping("/processRequest")
+    public void processRequest(@RequestBody RequestPayload requestPayload) {
+        for (RelatedParty relatedParty : requestPayload.getRelatedParty()) {
+            if ("serviceProvider".equals(relatedParty.getRole())) {
+                // Perform operation for serviceProvider using relatedParty.getName()
+                System.out.println("Service Provider: " + relatedParty.getName());
+            } else if ("request".equals(relatedParty.getRole())) {
+                // Perform operation for request using relatedParty.getName()
+                System.out.println("Request: " + relatedParty.getName());
+            }
+        }
+        // Additional processing based on other parts of the payload
+    }
+}
