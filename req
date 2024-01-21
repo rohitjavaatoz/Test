@@ -1,255 +1,3 @@
-public class PriorityRequest {
-    private String priority;
-    private List<TargetEntity> targetEntity;
-    private Specification specification;
-    private String plannedStartTime;
-    private String plannedEndTime;
-    private String requestType;
-    private List<ExternalReference> externalReference;
-    private List<Location> location;
-    private List<RelatedParty> relatedParty;
-    private String description;
-    private List<Attachment> attachment;
-    private Outage outage;
-    private String channel;
-    private String impact;
-    private String requestDate;
-    private String scheduledDate;
-    private String actualStartTime;
-    private String actualEndTime;
-    private String completionDate;
-    private String risk;
-    private String riskMitigationPlan;
-    private String riskValue;
-    private String status;
-    private String statusChangeDate;
-    private String statusChangeReason;
-    private Budget budget;
-    private List<ChangeRelationship> changeRelationship;
-    private List<ChangeRequestCharacteristic> changeRequestCharacteristic;
-    private List<ImpactEntity> impactEntity;
-    private List<Note> note;
-    private List<ProblemTicket> problemTicket;
-    private Resolution resolution;
-    private List<WorkLog> workLog;
-    private List<Sla> sla;
-    private List<TroubleTicket> troubleTicket;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class TargetEntity {
-    private String id;
-    private String href;
-    private String name;
-    private String role;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Specification {
-    private String id;
-    private String href;
-    private String name;
-    private String version;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class ExternalReference {
-    private String id;
-    private String externalReferenceType;
-    private String name;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Location {
-    private String id;
-    private String href;
-    private String name;
-    private String city;
-    private String state;
-    private String country;
-    private String role;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class RelatedParty {
-    private String id;
-    private String href;
-    private String name;
-    private String role;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Attachment {
-    private String description;
-    private String href;
-    private String id;
-    private String url;
-    private String name;
-    private String attachmentType;
-    private String content;
-    private String mimeType;
-    private String path;
-    private Size size;
-    private long sizeUnit;
-    private ValidFor validFor;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Size {
-    private long amount;
-    private String units;
-    // Getters and setters
-}
-public class ValidFor {
-    private String endDateTime;
-    private String startDateTime;
-    // Getters and setters
-}
-public class Outage {
-    private long outageDuration;
-    private String outageDurationUom;
-    private long outageNumber;
-    private String outageStart;
-    private String outageEnd;
-    // Getters and setters
-}
-public class Budget {
-    private String unit;
-    private long value;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class ChangeRelationship {
-    private String id;
-    private String href;
-    private String relationshipType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class ChangeRequestCharacteristic {
-    private String id;
-    private String name;
-    private String value;
-    private String valueType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class ImpactEntity {
-    private String id;
-    private String href;
-    private String name;
-    private String role;
-    private String action;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Note {
-    private String author;
-    private String date;
-    private String text;
-    private String id;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class ProblemTicket {
-    private String id;
-    private String href;
-    private String name;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Resolution {
-    private String code;
-    private String description;
-    private String name;
-    private List<Task> task;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Task {
-    private String description;
-    private String name;
-    private String state;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class WorkLog {
-    private String createDateTime;
-    private String description;
-    private String lastUpdateDateTime;
-    private List<Record> record;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Record {
-    private String dateTime;
-    private String description;
-    private String supportPerson;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class Sla {
-    private String href;
-    private String id;
-    private String name;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-public class TroubleTicket {
-    private String href;
-    private String id;
-    private String name;
-    private String referredType;
-    private String type;
-    private String schemaLocation;
-    private String baseType;
-    // Getters and setters
-}
-
----------------------
 {
   "priority": "string",
   "targetEntity": [
@@ -274,8 +22,8 @@ public class TroubleTicket {
     "@schemaLocation": "string",
     "@baseType": "string"
   },
-  "plannedStartTime": "2024-01-21T02:08:51.473Z",
-  "plannedEndTime": "2024-01-21T02:08:51.473Z",
+  "plannedStartTime": "2024-01-21T02:18:20.577Z",
+  "plannedEndTime": "2024-01-21T02:18:20.577Z",
   "requestType": "string",
   "externalReference": [
     {
@@ -332,8 +80,8 @@ public class TroubleTicket {
       },
       "sizeUnit": 0,
       "validFor": {
-        "endDateTime": "2024-01-21T02:08:51.473Z",
-        "startDateTime": "2024-01-21T02:08:51.473Z"
+        "endDateTime": "2024-01-21T02:18:20.577Z",
+        "startDateTime": "2024-01-21T02:18:20.577Z"
       },
       "@type": "string",
       "@schemaLocation": "string",
@@ -344,21 +92,21 @@ public class TroubleTicket {
     "outageDuration": 0,
     "outageDurationUom": "string",
     "outageNumber": 0,
-    "outageStart": "2024-01-21T02:08:51.474Z",
-    "outageEnd": "2024-01-21T02:08:51.474Z"
+    "outageStart": "2024-01-21T02:18:20.577Z",
+    "outageEnd": "2024-01-21T02:18:20.577Z"
   },
   "channel": "string",
   "impact": "string",
-  "requestDate": "2024-01-21T02:08:51.474Z",
-  "scheduledDate": "2024-01-21T02:08:51.474Z",
-  "actualStartTime": "2024-01-21T02:08:51.474Z",
-  "actualEndTime": "2024-01-21T02:08:51.474Z",
-  "completionDate": "2024-01-21T02:08:51.474Z",
+  "requestDate": "2024-01-21T02:18:20.577Z",
+  "scheduledDate": "2024-01-21T02:18:20.577Z",
+  "actualStartTime": "2024-01-21T02:18:20.577Z",
+  "actualEndTime": "2024-01-21T02:18:20.577Z",
+  "completionDate": "2024-01-21T02:18:20.577Z",
   "risk": "string",
   "riskMitigationPlan": "string",
   "riskValue": "string",
   "status": "string",
-  "statusChangeDate": "2024-01-21T02:08:51.474Z",
+  "statusChangeDate": "2024-01-21T02:18:20.578Z",
   "statusChangeReason": "string",
   "budget": {
     "unit": "string",
@@ -404,7 +152,7 @@ public class TroubleTicket {
   "note": [
     {
       "author": "string",
-      "date": "2024-01-21T02:08:51.474Z",
+      "date": "2024-01-21T02:18:20.578Z",
       "text": "string",
       "id": "string",
       "@type": "string",
@@ -443,12 +191,12 @@ public class TroubleTicket {
   },
   "workLog": [
     {
-      "createDateTime": "2024-01-21T02:08:51.474Z",
+      "createDateTime": "2024-01-21T02:18:20.578Z",
       "description": "string",
       "lastUpdateDateTime": "string",
       "record": [
         {
-          "dateTime": "2024-01-21T02:08:51.474Z",
+          "dateTime": "2024-01-21T02:18:20.578Z",
           "description": "string",
           "supportPerson": "string",
           "@type": "string",
