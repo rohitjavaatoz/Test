@@ -6,6 +6,20 @@
         "WHERE p.party_name = :partyName " +
         "RETURNING id", nativeQuery = true)
 public Long insertIntoApiMessages(@Param("partyName") String partyName, @Param("role") String role);
+INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by)
+SELECT p.id AS party_id, :role AS created_by, :role AS modified_by
+FROM ucmcmt.party p
+WHERE p.party_name = :partyName
+RETURNING id;
+---------
+@Modifying
+@Transactional
+@Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) " +
+        "SELECT p.id AS party_id, (:role) AS created_by, (:role) AS modified_by " +
+        "FROM ucmcmt.party p " +
+        "WHERE p.party_name = :partyName " +
+        "RETURNING id", nativeQuery = true)
+public Long insertIntoApiMessages(@Param("partyName") String partyName, @Param("role") String role);
 ----
 @Modifying
 @Transactional
