@@ -1,7 +1,11 @@
-@Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) " +
+  @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) " +
             "SELECT p.id AS party_id, (:role) AS created_by,(:role) As modified_by " +
             "FROM ucmcmt.party p " +
             "WHERE p.party_name = :partyName ", nativeQuery = true)
+    public void insertIntoApiMessages(@Param("partyName") String partyName, @Param("role") String role);
+
 ----------
 {
   "priority": "string",
