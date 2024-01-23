@@ -1,3 +1,4 @@
+JDBC exception executing SQL [INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) SELECT p.id AS party_id, (?) AS created_by, (?) AS modified_by FROM ucmcmt.party p WHERE p.party_name = ? RETURNING api_message_id] [A result was returned when none was expected.] [n/a]
 @Modifying
 @Transactional
 @Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) " +
