@@ -1,4 +1,14 @@
-  @Modifying
+@Modifying
+@Transactional
+@Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) " +
+        "SELECT p.id AS party_id, (:role) AS created_by, (:role) AS modified_by " +
+        "FROM ucmcmt.party p " +
+        "WHERE p.party_name = :partyName " +
+        "RETURNING * LIMIT 1", nativeQuery = true)
+public ApiMessage insertIntoApiMessagesAndReturn(@Param("partyName") String partyName, @Param("role") String role);
+
+-------
+@Modifying
     @Transactional
     @Query(value = "INSERT INTO ucmcmt.api_messages (party_id, created_by, modified_by) " +
             "SELECT p.id AS party_id, (:role) AS created_by,(:role) As modified_by " +
