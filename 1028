@@ -1,3 +1,154 @@
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.dao.DataAccessException;
+
+@RestController
+@RequestMapping("/your/api/path")
+public class YourController {
+
+    @PostMapping("/tmForum")
+    public ResponseEntity<ApiResponse> tmForum(@RequestBody PriorityRequest priorityRequest) {
+        try {
+            // Call the service method
+            ApiResponse apiResponse = yourService.TmForum(priorityRequest);
+            
+            // Return success response
+            return ResponseEntity.ok(apiResponse);
+        } catch (DataAccessException | IllegalArgumentException ex) {
+            // Log the exception or handle it appropriately
+            ex.printStackTrace(); // Replace with proper logging
+            
+            // Build error response
+            ApiResponse errorResponse = new ApiResponse();
+            errorResponse.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorResponse.setReason(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            errorResponse.setMessage("An internal server error occurred");
+            errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorResponse.setReferenceError(ex.getMessage()); // Use the exception message as the referenceError
+            errorResponse.setAtType("ErrorType"); // Set the appropriate error type
+            errorResponse.setAtSchemaLocation("ErrorSchemaLocation"); // Set the appropriate schema location
+            
+            // Return error response
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+}
+
+------
+import org.springframework.dao.DataAccessException;
+
+public class YourClassName {
+
+    public ApiResponse TmForum(PriorityRequest priorityRequest) {
+        try {
+            if (priorityRequest == null) {
+                throw new IllegalArgumentException("PriorityRequest cannot be null");
+            }
+
+            List<RelatedParty> relatedParties = priorityRequest.getRelatedParty();
+            if (relatedParties == null) {
+                throw new IllegalArgumentException("RelatedParty list cannot be null");
+            }
+
+            String partyName = null;
+            String userName = null;
+            Messages messages = new Messages();
+            Object party = null;
+            ApiResponse apiResponse = new ApiResponse();
+            EmailMessageNetworkElements emailMessageNetworkElements = new EmailMessageNetworkElements();
+
+            for (RelatedParty relatedParty : relatedParties) {
+                if (Constants.SERVICE_PROVIDER.equals(relatedParty.getRole())) {
+                    partyName = relatedParty.getName();
+                }
+                if (Constants.REQUESTOR.equals(relatedParty.getRole())) {
+                    userName = relatedParty.getName();
+                }
+            }
+
+            if (userName == null || partyName == null) {
+                throw new IllegalArgumentException("Invalid user or party information");
+            }
+
+            messages.setMessagesTypeId(Constants.MESSAGE_TYPE_ID);
+            messages.setMessagesStatusId(Constants.RECEIVE_MESSAGES_STATUS_ID);
+            messages.setCreatedBy(userName);
+            messages.setModifiedBy(userName);
+            messagesRepository.save(messages);
+
+            ApiMessages apiMessages = apiMessagesRepository.insertIntoApiMessages(partyName, userName);
+            System.out.println("apiMessages----" + apiMessages);
+
+            emailMessageNetworkElements.setCreatedBy(userName);
+            emailMessageNetworkElements.setModifiedBy(userName);
+
+            List<TargetEntity> targetEntities = priorityRequest.getTargetEntity();
+            if (targetEntities != null && !targetEntities.isEmpty()) {
+                for (TargetEntity targetEntity : targetEntities) {
+                    emailMessageNetworkElements.setNetworkElementName(targetEntity.getName());
+                }
+                emailMessageNetworkElementsRepository.save(emailMessageNetworkElements);
+            } else {
+                throw new IllegalArgumentException("TargetEntity list cannot be null or empty");
+            }
+
+            EmailAttachments emailAttachments = new EmailAttachments();
+            emailAttachments.setEmailMessageId(apiMessages.getApiMessageId());
+
+            List<Attachment> attachments = priorityRequest.getAttachment();
+            if (attachments != null) {
+                for (Attachment attachment : attachments) {
+                    emailAttachments.setFileName(attachment.getName());
+                    emailAttachments.setFileType(attachment.getAttachmentType());
+                    emailAttachments.setFileSize((int) attachment.getSize().getAmount());
+                    // emailAttachments.setAttachmentFile(attachment.getContent()); datatype mismatch
+                }
+                emailAttachments.setCreatedBy(userName);
+                emailAttachments.setModifiedBy(userName);
+                emailAttachmentsRepository.save(emailAttachments);
+            } else {
+                throw new IllegalArgumentException("Attachment list cannot be null");
+            }
+
+            EmailMessageExtraction emailMessageExtraction = new EmailMessageExtraction();
+            emailMessageExtraction.setStartDate(priorityRequest.getPlannedStartTime());
+            emailMessageExtraction.setEndDate(priorityRequest.getPlannedEndTime());
+            emailMessageExtraction.setOutageDuration((int) priorityRequest.getOutage().getOutageDuration());
+            emailMessageExtraction.setOutageDurationUom(priorityRequest.getOutage().getOutageDurationUom());
+            emailMessageExtraction.setOutageNumber((int) priorityRequest.getOutage().getOutageNumber());
+
+            List<Location> locations = priorityRequest.getLocation();
+            if (locations != null && !locations.isEmpty()) {
+                for (Location location : locations) {
+                    emailMessageExtraction.setCity(location.getCity());
+                    emailMessageExtraction.setCountry(location.getCountry());
+                    emailMessageExtraction.setState(location.getState());
+                }
+                emailMessageExtraction.setCreatedBy(userName);
+                emailMessageExtraction.setModifiedBy(userName);
+                emailMessageExtractionRepository.save(emailMessageExtraction);
+            } else {
+                throw new IllegalArgumentException("Location list cannot be null or empty");
+            }
+
+            apiResponse.setAttachment(Arrays.asList());
+            apiResponse.setPriority(priorityRequest.getPriority());
+
+            return apiResponse;
+        } catch (DataAccessException | IllegalArgumentException ex) {
+            // Log the exception or handle it appropriately
+            ex.printStackTrace(); // Replace with proper logging
+            // Return an error response
+            return new ApiResponse(/* Set appropriate response for error case */);
+        }
+    }
+}
+
+===========
 public ApiResponse TmForum(PriorityRequest priorityRequest) {
         priorityRequest.getRelatedParty();
         String partyName = null;
