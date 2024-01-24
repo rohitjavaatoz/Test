@@ -1,0 +1,80 @@
+public ApiResponse TmForum(PriorityRequest priorityRequest) {
+        priorityRequest.getRelatedParty();
+        String partyName = null;
+        String userName = null;
+        Messages messages = new Messages();
+        Object party = null;
+        ApiResponse apiResponse= new ApiResponse();
+        EmailMessageNetworkElements emailMessageNetworkElements = new EmailMessageNetworkElements();
+        for (RelatedParty relatedParty : priorityRequest.getRelatedParty()) {
+            if (Constants.SERVICE_PROVIDER.equals(relatedParty.getRole())) {
+                partyName = relatedParty.getName();
+            }
+            if (Constants.REQUESTOR.equals(relatedParty.getRole())) {
+                userName = relatedParty.getName();
+            }
+        }
+        messages.setMessagesTypeId(Constants.MESSAGE_TYPE_ID);
+        messages.setMessagesStatusId(Constants.RECIEVE_MESSAGES_STATUS_ID);
+        messages.setCreatedBy(userName);
+        messages.setModifiedBy(userName);
+        messagesRepository.save(messages);
+        ApiMessages apiMessages= apiMessagesRepository.insertIntoApiMessages(partyName, userName);
+        System.out.println("apiMessages----"+apiMessages);
+        emailMessageNetworkElements.setCreatedBy(userName);
+        emailMessageNetworkElements.setModifiedBy(userName);
+        for (TargetEntity targetEntity : priorityRequest.getTargetEntity()) {
+            emailMessageNetworkElements.setNetworkElementName(targetEntity.getName());
+        }
+        emailMessageNetworkElementsRepository.save(emailMessageNetworkElements);
+        EmailAttachments emailAttachments = new EmailAttachments();
+        emailAttachments.setEmailMessageId(apiMessages.getApiMessageId());
+        for (Attachment attachment : priorityRequest.getAttachment()) {
+            emailAttachments.setFileName(attachment.getName());
+            emailAttachments.setFileType(attachment.getAttachmentType());
+            emailAttachments.setFileSize((int) attachment.getSize().getAmount());
+//           emailAttachments.setAttachmentFile(attachment.getContent()); datatype messmatching
+        }
+        emailAttachments.setCreatedBy(userName);
+        emailAttachments.setModifiedBy(userName);
+        emailAttachmentsRepository.save(emailAttachments);
+        EmailMessageExtraction emailMessageExtraction = new EmailMessageExtraction();
+        emailMessageExtraction.setStartDate(priorityRequest.getPlannedStartTime());
+        emailMessageExtraction.setEndDate(priorityRequest.getPlannedEndTime());
+        emailMessageExtraction.setOutageDuration((int) priorityRequest.getOutage().getOutageDuration());
+        emailMessageExtraction.setOutageDurationUom(priorityRequest.getOutage().getOutageDurationUom());
+        emailMessageExtraction.setOutageNumber((int) priorityRequest.getOutage().getOutageNumber());
+        for (Location location : priorityRequest.getLocation()) {
+            emailMessageExtraction.setCity(location.getCity());
+            emailMessageExtraction.setCountry(location.getCountry());
+            emailMessageExtraction.setState(location.getState());
+        }
+        emailMessageExtraction.setCreatedBy(userName);
+        emailMessageExtraction.setModifiedBy(userName);
+        emailMessageExtractionRepository.save(emailMessageExtraction);
+        apiResponse.setAttachment(Arrays.asList());
+        apiResponse.setPriority(priorityRequest.getPriority());
+        return apiResponse;
+    }
+}
+---------------------------
+ @Override
+    public ResponseEntity<ApiResponse> createEmailAttachment(@RequestBody PriorityRequest priorityRequest) {
+        ApiResponse apiResponse = new ApiResponse();
+        try {
+            apiResponse=  apiMessagesService.TmForum(priorityRequest);
+        }catch (Exception e){
+
+        }
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    ----------
+    {
+  "code": 0,
+  "reason": 0,
+  "message": "string",
+  "status": 0,
+  "referenceError": "string",
+  "@type": "string",
+  "@schemaLocation": "string"
+}
