@@ -50,3 +50,77 @@
             return null;
         }
     }
+--------------
+import static org.mockito.Mockito.*;
+
+@RunWith(MockitoJUnitRunner.class)
+public class YourClassTest {
+
+    @InjectMocks
+    private YourClass yourClass;
+
+    @Mock
+    private EmailMessageExtractionRepository emailMessageExtractionRepository;
+
+    @Mock
+    private EmailMessagesRepository emailMessagesRepository;
+
+    @Mock
+    private EmailMessageNetworkElementsRepository emailMessageNetworkElementsRepository;
+
+    @Mock
+    private Iso3CountryCodeService iso3CountryCodeService;
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @Mock
+    private JwtTokenService jwtTokenService;
+
+    @Mock
+    private AppProperties appProperties;
+
+    @Test
+    public void testFetchLocationIds() {
+        // Mocking data
+        Integer emailExtractionId = 1;
+        UUID uuid = UUID.randomUUID();
+        EmailMessageExtraction emailMessageExtraction = new EmailMessageExtraction(); // create and set necessary data
+        when(emailMessageExtractionRepository.findByExtractionId(emailExtractionId)).thenReturn(emailMessageExtraction);
+
+        // Mock other necessary data and repository calls
+        when(emailMessagesRepository.findSubjectByExtractionId(emailExtractionId)).thenReturn("Test Subject");
+        when(emailMessageNetworkElementsRepository.getCircuitsByExtId1(emailExtractionId)).thenReturn(Collections.emptyList());
+        when(emailMessageNetworkElementsRepository.getDevicesByExtId(emailExtractionId)).thenReturn(Collections.emptyList());
+
+        // Mocking the restTemplate exchange call
+        EmailLocationDTO expectedResponse = new EmailLocationDTO(); // create and set necessary data
+        ResponseEntity<EmailLocationDTO> responseEntity = new ResponseEntity<>(expectedResponse, HttpStatus.OK);
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(), eq(EmailLocationDTO.class)))
+                .thenReturn(responseEntity);
+
+        // Mocking the jwtTokenService
+        when(jwtTokenService.getJwtToken(anyString())).thenReturn("mockedJwtToken");
+
+        // Actual method call
+        EmailLocationDTO result = yourClass.fetchLocationIds(emailExtractionId, uuid);
+
+        // Assertions
+        assertNotNull(result);
+        // Add more assertions based on your expected behavior
+
+        // Verify repository calls
+        verify(emailMessageExtractionRepository).findByExtractionId(emailExtractionId);
+        verify(emailMessagesRepository).findSubjectByExtractionId(emailExtractionId);
+        verify(emailMessageNetworkElementsRepository).getCircuitsByExtId1(emailExtractionId);
+        verify(emailMessageNetworkElementsRepository).getDevicesByExtId(emailExtractionId);
+
+        // Verify restTemplate call
+        verify(restTemplate).exchange(anyString(), any(HttpMethod.class), any(), eq(EmailLocationDTO.class));
+
+        // Verify jwtTokenService call
+        verify(jwtTokenService).getJwtToken(Constants.AUTO_SUBMITTER);
+    }
+
+    // Add more test cases for different scenarios, edge cases, and error handling
+}
