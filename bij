@@ -1,0 +1,52 @@
+ public EmailLocationDTO fetchLocationIds(Integer emailExtractionId, UUID uuid) {
+        EmailLocationRequest emailLocationRequest = new EmailLocationRequest();
+        EmailMessageExtraction emailMessageExtraction = emailMessageExtractionRepository.findByExtractionId(emailExtractionId);
+        LOGGER.info("fetchLocationIds:: Extraction details taken from database. uuid={}",uuid);
+        String description = emailMessagesRepository.findSubjectByExtractionId(emailExtractionId);
+        LOGGER.info("fetchLocationIds:: Email description details taken from database. uuid={}",uuid);
+        List<EmailMessageNetworkElements> circuits = emailMessageNetworkElementsRepository.getCircuitsByExtId1(emailExtractionId);
+        LOGGER.info("fetchLocationIds:: Circuit details taken from database. uuid={}",uuid);
+        List<EmailMessageNetworkElements> devices = emailMessageNetworkElementsRepository.getDevicesByExtId(emailExtractionId);
+        LOGGER.info("fetchLocationIds:: Device details taken from database. uuid={}",uuid);
+        LOGGER.info("fetchLocationIds:: Preparing payload for fetching locationIds for TPM request, uuid:{}",uuid);
+        List<EmailMessageNetworkElements> emailMessageNetworkElements = !circuits.isEmpty()?circuits:devices;
+        EmailMessageNetworkElements emailMessageNetworkElements1 = emailMessageNetworkElements.stream()
+                                                                    .filter(EmailMessageNetworkElements::getValid)
+                                                                    .findFirst().orElse(null);
+        if(null!=emailMessageExtraction.getCountry()) {
+            emailLocationRequest.setCountry(iso3CountryCodeService.getISO3CountryCodeByName(emailMessageExtraction.getCountry(), uuid));
+        }
+        emailLocationRequest.setState(Constants.US_STATES.entrySet()
+                .stream()
+                .filter(e -> Objects.equals(e.getValue().toLowerCase(),emailMessageExtraction.getState().toLowerCase()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null));
+        if(null!=emailMessageExtraction.getCity()) {
+            emailLocationRequest.setCity(emailMessageExtraction.getCity());
+        }
+        emailLocationRequest.setValid(false);
+        if(emailMessageNetworkElements1!=null){
+            emailLocationRequest.setEquipmentType(emailMessageNetworkElements1.getNetworkElementType());
+            emailLocationRequest.setEquipmentId(emailMessageNetworkElements1.getEquipmentId());
+            emailLocationRequest.setValid(emailMessageNetworkElements1.getValid());
+        }
+        LOGGER.info("fetchLocationIds:: Payload creation completed for fetching locationIds for TPM request, uuid:{},email_location_request:{}",uuid,emailLocationRequest.toString());
+        String jwtToken = CleanPath.cleanString(jwtTokenService.getJwtToken(Constants.AUTO_SUBMITTER));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.set("uuid",uuid.toString());
+        headers.setBearerAuth(jwtToken);
+        headers.set("jwttoken", jwtToken);
+        HttpEntity<EmailLocationRequest> entity = new HttpEntity<>(emailLocationRequest, headers);
+        ResponseEntity<EmailLocationDTO> response = null;
+        try {
+            LOGGER.info("fetchLocationIds:: Making the rest call to p&sch for fetching locationIds for TPM request, uuid:{}",uuid);
+            response = restTemplate.exchange(appProperties.getEmailLocationId(), HttpMethod.POST, entity, EmailLocationDTO.class);
+            LOGGER.info("fetchLocationIds:: Fetched locationIds {} for TPM request, uuid:{}",response.getBody().toString(),uuid);
+            return response.getBody();
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred during fetching of locationIds {} {}, uuid={}", e.getStackTrace(), e.getMessage(),uuid);
+            return null;
+        }
+    }
