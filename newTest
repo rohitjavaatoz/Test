@@ -1,0 +1,12 @@
+@Override
+	public ResponseEntity<EmailLocationDTO> getLocationIds(Integer emailExtractionId, UUID uuid) {
+		try {
+			LOGGER.info("TPMRequestApiRestController:: getLocationIds:: fetching locationIds for TPM request with ExtractionId:{},uuid:{}",emailExtractionId,uuid);
+			EmailLocationDTO emailLocationDTO = tpmRequestService.fetchLocationIds(emailExtractionId,uuid);
+			LOGGER.info("TPMRequestApiRestController:: getLocationIds:: fetched locationIds for TPM request with ExtractionId:{},uuid:{}",emailExtractionId,uuid);
+			return new ResponseEntity<>(emailLocationDTO,HttpStatus.OK);
+		} catch (Exception e) {
+			LOGGER.error("TPMRequestApiRestController:: getLocationIds:: Exception occurred during fetching of locationIds {} {}, uuid={}", e.getStackTrace(), e.getMessage(),uuid);
+			return null;
+		}
+	}
