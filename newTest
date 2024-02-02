@@ -10,3 +10,25 @@
 			return null;
 		}
 	}
+------
+@Test
+public void getLocationIds_Exception() {
+    // Arrange
+    int emailExtractionId = 1;
+    UUID uuid = UUID.randomUUID();
+
+    // Mocking an exception
+    when(tpmRequestService.fetchLocationIds(emailExtractionId, uuid)).thenThrow(new RuntimeException("Simulated exception"));
+
+    // Act
+    ResponseEntity<EmailLocationDTO> responseEntity = controller.getLocationIds(emailExtractionId, uuid);
+
+    // Assert
+    assertNotNull(responseEntity);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+    assertNull(responseEntity.getBody());
+
+    // Verify method calls
+    verify(tpmRequestService, times(1)).fetchLocationIds(emailExtractionId, uuid);
+    // Additional verifications for logging if necessary
+}
